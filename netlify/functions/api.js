@@ -1,14 +1,13 @@
 // IMPORTANT: This code runs on a server, not in the browser.
-// It's safe to use API keys here because they are stored as environment variables.
 
-// CORRECTED: Import the official smartsheet-javascript-sdk
-const smartsheetSdk = require('smartsheet-javascript-sdk');
+// CORRECTED: Import the official 'smartsheet' package
+const smartsheet = require('smartsheet');
 
 // We need the openai client to talk to OpenAI
 const OpenAI = require('openai');
 
-// CORRECTED: Initialize the Smartsheet client using the official SDK
-const smartsheetClient = smartsheetSdk.createClient({
+// CORRECTED: Initialize the Smartsheet client using the official package
+const smartsheetClient = smartsheet.createClient({
     accessToken: process.env.SMARTSHEET_ACCESS_TOKEN
 });
 
@@ -55,9 +54,7 @@ exports.handler = async (event) => {
 // Fetches the list of organizations from Smartsheet
 async function getOrganizations() {
     const options = { id: ORGS_SHEET_ID };
-    // CORRECTED: Use the new client variable
     const sheet = await smartsheetClient.sheets.getSheet(options);
-    // Map the sheet rows to a cleaner JSON format
     return sheet.rows.map(row => ({
         id: row.id,
         name: row.cells.find(c => c.columnId === sheet.columns[0].id)?.value || 'Unnamed Org'
@@ -66,14 +63,11 @@ async function getOrganizations() {
 
 // The main analysis logic
 async function analyzeSnippet({ orgId, hasPCP, snippet }) {
-    // 1. Fetch all rules and org details from Smartsheet in parallel
     const [allRules, orgDetails] = await Promise.all([
-        // CORRECTED: Use the new client variable
         smartsheetClient.sheets.getSheet({ id: RULES_SHEET_ID }),
         getOrgDetails(orgId)
     ]);
 
-    // 2. Use OpenAI to classify the snippet and match it to a rule
     const matchedRuleId = await classifySnippetWithOpenAI(snippet, allRules);
     if (!matchedRuleId) {
         throw new Error('OpenAI could not confidently match the snippet to a known rule.');
@@ -88,12 +82,8 @@ async function analyzeSnippet({ orgId, hasPCP, snippet }) {
         throw new Error(`Matched rule ID ${matchedRuleId} not found in Smartsheet.`);
     }
     
-    // Convert the matched Smartsheet row into a simple object
     const matchedRule = formatRowToObject(matchedRuleRow, allRules.columns);
-
-    // 3. Determine the final action plan and communication strategy
     const actionPlan = matchedRule.Recommendation;
-
     const communication = await selectCommunicationTemplate({
         orgDetails,
         hasPCP,
@@ -153,7 +143,6 @@ async function classifySnippetWithOpenAI(snippet, rulesSheet) {
 
 // Selects the right communication template based on the situation
 async function selectCommunicationTemplate({ orgDetails, hasPCP, severity }) {
-    // CORRECTED: Use the new client variable
     const templatesSheet = await smartsheetClient.sheets.getSheet({ id: TEMPLATES_SHEET_ID });
     const templates = templatesSheet.rows.map(row => formatRowToObject(row, templatesSheet.columns));
 
@@ -185,7 +174,6 @@ async function selectCommunicationTemplate({ orgDetails, hasPCP, severity }) {
 
 // Utility to get details for a specific org
 async function getOrgDetails(orgId) {
-    // CORRECTED: Use the new client variable
     const sheet = await smartsheetClient.sheets.getSheet({ id: ORGS_SHEET_ID });
     const orgRow = sheet.rows.find(row => row.id == orgId);
     if (!orgRow) throw new Error('Organization not found.');
