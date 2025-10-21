@@ -7,5 +7,25 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "smartsheet": "^2.1.0",
+    "openai": "^4.20.1"
+  }
+}
+``````json
+{
+  "name": "navigator-app-functions",
+  "version": "1.0.0",
+  "description": "Serverless functions for the navigator app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "smartsheet": "^2.1.0",
+    "openai": "^4.20.1"
+  }
 }
