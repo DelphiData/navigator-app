@@ -1,16 +1,17 @@
 // IMPORTANT: This code runs on a server, not in the browser.
 // It's safe to use API keys here because they are stored as environment variables.
 
-// We need the smartsheet client to talk to Smartsheet
-const smartersheet = require('smartersheet');
+// CORRECTED: Import the official smartsheet-javascript-sdk
+const smartsheetSdk = require('smartsheet-javascript-sdk');
 
 // We need the openai client to talk to OpenAI
 const OpenAI = require('openai');
 
-// Initialize clients with API keys from secure environment variables
-const smartsheet = smartersheet.createClient({
+// CORRECTED: Initialize the Smartsheet client using the official SDK
+const smartsheetClient = smartsheetSdk.createClient({
     accessToken: process.env.SMARTSHEET_ACCESS_TOKEN
 });
+
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
@@ -54,7 +55,8 @@ exports.handler = async (event) => {
 // Fetches the list of organizations from Smartsheet
 async function getOrganizations() {
     const options = { id: ORGS_SHEET_ID };
-    const sheet = await smartsheet.sheets.getSheet(options);
+    // CORRECTED: Use the new client variable
+    const sheet = await smartsheetClient.sheets.getSheet(options);
     // Map the sheet rows to a cleaner JSON format
     return sheet.rows.map(row => ({
         id: row.id,
@@ -66,7 +68,8 @@ async function getOrganizations() {
 async function analyzeSnippet({ orgId, hasPCP, snippet }) {
     // 1. Fetch all rules and org details from Smartsheet in parallel
     const [allRules, orgDetails] = await Promise.all([
-        smartsheet.sheets.getSheet({ id: RULES_SHEET_ID }),
+        // CORRECTED: Use the new client variable
+        smartsheetClient.sheets.getSheet({ id: RULES_SHEET_ID }),
         getOrgDetails(orgId)
     ]);
 
@@ -89,8 +92,6 @@ async function analyzeSnippet({ orgId, hasPCP, snippet }) {
     const matchedRule = formatRowToObject(matchedRuleRow, allRules.columns);
 
     // 3. Determine the final action plan and communication strategy
-    // This is where we check for radiologist recommendations first.
-    // For simplicity in this version, we'll use the rule's recommendation directly.
     const actionPlan = matchedRule.Recommendation;
 
     const communication = await selectCommunicationTemplate({
@@ -117,7 +118,7 @@ async function classifySnippetWithOpenAI(snippet, rulesSheet) {
     try {
         const response = await openai.chat.completions.create({
             model: "gpt-4-turbo",
-            temperature: 0, // Set to 0 for deterministic, rule-based output
+            temperature: 0,
             messages: [
                 {
                     role: "system",
@@ -152,12 +153,12 @@ async function classifySnippetWithOpenAI(snippet, rulesSheet) {
 
 // Selects the right communication template based on the situation
 async function selectCommunicationTemplate({ orgDetails, hasPCP, severity }) {
-    const templatesSheet = await smartsheet.sheets.getSheet({ id: TEMPLATES_SHEET_ID });
+    // CORRECTED: Use the new client variable
+    const templatesSheet = await smartsheetClient.sheets.getSheet({ id: TEMPLATES_SHEET_ID });
     const templates = templatesSheet.rows.map(row => formatRowToObject(row, templatesSheet.columns));
 
     let channel, recipient;
 
-    // Logic to determine the best communication channel
     if (orgDetails.allowsInBasket && hasPCP) {
         channel = 'In-Basket';
         recipient = 'PCP';
@@ -169,11 +170,9 @@ async function selectCommunicationTemplate({ orgDetails, hasPCP, severity }) {
         recipient = 'Ordering Provider';
     }
     
-    // Find the best template. This logic can be expanded.
-    // E.g., for Red severity, you might pick a different Patient Letter.
     let chosenTemplate = templates.find(t => t.Channel === channel && t.Recipient === recipient);
     
-    if (!chosenTemplate) { // Fallback if a specific template isn't found
+    if (!chosenTemplate) {
         chosenTemplate = templates.find(t => t.Channel === 'Fax') || templates[0];
     }
     
@@ -186,7 +185,8 @@ async function selectCommunicationTemplate({ orgDetails, hasPCP, severity }) {
 
 // Utility to get details for a specific org
 async function getOrgDetails(orgId) {
-    const sheet = await smartsheet.sheets.getSheet({ id: ORGS_SHEET_ID });
+    // CORRECTED: Use the new client variable
+    const sheet = await smartsheetClient.sheets.getSheet({ id: ORGS_SHEET_ID });
     const orgRow = sheet.rows.find(row => row.id == orgId);
     if (!orgRow) throw new Error('Organization not found.');
     
@@ -201,7 +201,6 @@ function formatRowToObject(row, columns) {
     const obj = {};
     columns.forEach(column => {
         const cell = row.cells.find(c => c.columnId === column.id);
-        // Sanitize column title to be a valid key (e.g., "Rule ID" -> "RuleID")
         const key = column.title.replace(/\s+/g, '');
         if (cell) {
             obj[key] = cell.value;
