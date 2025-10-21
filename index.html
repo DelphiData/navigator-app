@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incidental Findings Navigator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Incidental Findings Navigator</h1>
+            <p>Enter details from the report to get a recommended action plan.</p>
+        </header>
+        <main>
+            <div class="form-section">
+                <h2>Case Details</h2>
+                <div class="form-group">
+                    <label for="org-select">1. Select Healthcare Organization:</label>
+                    <select id="org-select">
+                        <option value="">Loading organizations...</option>
+                    </select>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="pcp-checkbox">
+                    <label for="pcp-checkbox">2. Patient has a Primary Care Provider (PCP) on record.</label>
+                </div>
+                <div class="form-group">
+                    <label for="report-snippet">3. Paste Relevant Report Snippet:</label>
+                    <textarea id="report-snippet" rows="8" placeholder="e.g., 'A 1.2 cm indeterminate solid mass is seen in the upper pole of the right kidney.'"></textarea>
+                </div>
+                <button id="analyze-button">Analyze Snippet</button>
+            </div>
+            
+            <div id="results-section" class="results-section hidden">
+                <div id="loader" class="loader hidden"></div>
+                <h2>Analysis and Recommended Plan</h2>
+                <div id="error-message" class="error hidden"></div>
+                <div id="results-content">
+                    <h3><span class="icon">&#128220;</span> Matched Guideline</h3>
+                    <p id="matched-rule"><strong>Finding:</strong> <span class="placeholder"></span></p>
+                    <p id="matched-condition"><strong>Condition:</strong> <span class="placeholder"></span></p>
+                    <p id="matched-severity"><strong>Severity Tier:</strong> <span class="placeholder"></span></p>
+                    
+                    <h3><span class="icon">&#128195;</span> Recommended Action</h3>
+                    <p id="action-plan"><strong>Next Step:</strong> <span class="placeholder"></span></p>
+                    <p id="communication-channel"><strong>Communication Method:</strong> <span class="placeholder"></span></p>
+
+                    <h3><span class="icon">&#9993;</span> Communication Template</h3>
+                    <div class="template-container">
+                        <div class="template-header">
+                            <strong id="template-name"></strong>
+                            <button id="copy-button">Copy Text</button>
+                        </div>
+                        <pre id="communication-template"></pre>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
