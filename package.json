@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "smartsheet-javascript-sdk": "^3.0.1",
+    "smartsheet": "^2.1.0",
     "openai": "^4.20.1"
   }
 }
