@@ -1,0 +1,42 @@
+[
+  {
+    "OrgName": "General Hospital",
+    "AllowsFax": false,
+    "FaxNumber": "555-123-4567",
+    "SpecialistsAvailable": [
+      "Cardiology",
+      "Pulmonology",
+      "Urology",
+      "Endocrinology",
+      "Gastroenterology",
+      "Oncology"
+    ]
+  },
+  {
+    "OrgName": "Community Clinic",
+    "AllowsFax": false,
+    "FaxNumber": "555-987-6543",
+    "SpecialistsAvailable": [
+      "Cardiology",
+      "Pulmonology"
+    ]
+  },
+  {
+    "OrgName": "",
+    "AllowsFax": false,
+    "FaxNumber": "",
+    "SpecialistsAvailable": []
+  },
+  {
+    "OrgName": "",
+    "AllowsFax": false,
+    "FaxNumber": "",
+    "SpecialistsAvailable": []
+  },
+  {
+    "OrgName": "",
+    "AllowsFax": false,
+    "FaxNumber": "",
+    "SpecialistsAvailable": []
+  }
+]
