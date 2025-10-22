@@ -1,121 +1,256 @@
-document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
+// script.js (ESM)
+
+const DATA_URL = './data/cases.json';
+
+// --- State ---
+let allCases = [];
+let filtered = [];
+let selected = null;
+
+// --- DOM ---
+const tbody = document.getElementById('casesTbody');
+const emptyState = document.getElementById('emptyState');
+const filterBodyPart = document.getElementById('filterBodyPart');
+const filterSeverity = document.getElementById('filterSeverity');
+const searchBox = document.getElementById('searchBox');
+const reloadBtn = document.getElementById('reloadBtn');
+const downloadCsv = document.getElementById('downloadCsv');
+
+const composerOut = document.getElementById('composerOut');
+const copyBtn = document.getElementById('copyBtn');
+const downloadTxt = document.getElementById('downloadTxt');
+const mailtoBtn = document.getElementById('mailtoBtn');
+document.querySelectorAll('.templateBtn').forEach(btn =>
+  btn.addEventListener('click', () => generateTemplate(btn.dataset.template))
+);
+
+// --- Utilities ---
+const fmtDate = iso => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d)) return iso;
+  return d.toLocaleDateString();
+};
+const esc = s => (s ?? '').toString();
+
+function mapCaseFields(row) {
+  // 🔁 Adjust this mapper if your JSON keys differ.
+  // Expected shape per row (examples in /data/cases.json):
+  // {
+  //   id, patientName, mrn, bodyPart, finding, recommendation,
+  //   severity, due, pcpName, pcpEmail
+  // }
+  return {
+    id: row.id,
+    patientName: row.patientName,
+    mrn: row.mrn,
+    bodyPart: row.bodyPart,
+    finding: row.finding,
+    recommendation: row.recommendation,
+    severity: row.severity, // Red | Amber | Green
+    due: row.due,           // ISO date
+    pcpName: row.pcpName,
+    pcpEmail: row.pcpEmail || '',
+  };
+}
+
+function toCsv(rows) {
+  const headers = [
+    'id','patientName','mrn','bodyPart','finding','recommendation','severity','due','pcpName','pcpEmail'
+  ];
+  const lines = [headers.join(',')];
+  for (const r of rows) {
+    const vals = headers.map(h => {
+      const v = r[h] ?? '';
+      return /[",\n]/.test(v) ? `"${String(v).replace(/"/g, '""')}"` : v;
+    });
+    lines.push(vals.join(','));
+  }
+  return lines.join('\n');
+}
+
+// --- Rendering ---
+function renderTable(rows) {
+  tbody.innerHTML = '';
+  if (!rows.length) {
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  for (const r of rows) {
+    const tr = document.createElement('tr');
+
+    const status = document.createElement('td');
+    const b = document.createElement('span');
+    b.className = 'badge ' + (r.severity?.toLowerCase() || 'green');
+    b.textContent = r.severity || 'Green';
+    status.appendChild(b);
+    tr.appendChild(status);
+
+    const patient = document.createElement('td');
+    patient.textContent = r.patientName || '';
+    tr.appendChild(patient);
+
+    const mrn = document.createElement('td');
+    mrn.textContent = r.mrn || '';
+    tr.appendChild(mrn);
+
+    const bp = document.createElement('td');
+    bp.textContent = r.bodyPart || '';
+    tr.appendChild(bp);
+
+    const finding = document.createElement('td');
+    finding.textContent = r.finding || '';
+    tr.appendChild(finding);
+
+    const rec = document.createElement('td');
+    rec.textContent = r.recommendation || '';
+    tr.appendChild(rec);
+
+    const due = document.createElement('td');
+    due.textContent = fmtDate(r.due);
+    tr.appendChild(due);
+
+    const pcp = document.createElement('td');
+    pcp.textContent = r.pcpName || '';
+    tr.appendChild(pcp);
+
+    const actions = document.createElement('td');
+    const pick = document.createElement('button');
+    pick.textContent = 'Select';
+    pick.addEventListener('click', () => {
+      selected = r;
+      highlightSelected(tr);
+    });
+    actions.appendChild(pick);
+    tr.appendChild(actions);
+
+    tbody.appendChild(tr);
+  }
+}
+
+function highlightSelected(tr) {
+  tbody.querySelectorAll('tr').forEach(row => row.style.outline = '');
+  tr.style.outline = '2px solid var(--accent)';
+}
+
+// --- Filtering ---
+function applyFilters() {
+  const term = searchBox.value.trim().toLowerCase();
+  const bp = filterBodyPart.value;
+  const sev = filterSeverity.value;
+
+  filtered = allCases.filter(r => {
+    if (bp && r.bodyPart !== bp) return false;
+    if (sev && r.severity !== sev) return false;
+    if (!term) return true;
+    const hay = `${r.patientName} ${r.mrn} ${r.bodyPart} ${r.finding} ${r.recommendation} ${r.pcpName}`.toLowerCase();
+    return hay.includes(term);
+  });
+
+  renderTable(filtered);
+  const csv = toCsv(filtered);
+  const blob = new Blob([csv], { type: 'text/csv' });
+  downloadCsv.href = URL.createObjectURL(blob);
+}
+
+// --- Data load ---
+async function loadData() {
+  const res = await fetch(DATA_URL, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Failed to fetch ${DATA_URL}`);
+  const raw = await res.json();
+  allCases = raw.map(mapCaseFields);
+  populateBodyPartFilter(allCases);
+  applyFilters();
+}
+
+function populateBodyPartFilter(rows) {
+  const opts = new Set(rows.map(r => r.bodyPart).filter(Boolean));
+  filterBodyPart.innerHTML = '<option value="">All</option>' +
+    [...opts].sort().map(v => `<option value="${v}">${v}</option>`).join('');
+}
+
+// --- Templates ---
+const templates = {
+  patientLetter: (r) => `
+Dear ${esc(r.patientName)},
+
+Your recent imaging showed an incidental finding involving the ${esc(r.bodyPart)}:
+"${esc(r.finding)}".
+
+Recommendation: ${esc(r.recommendation || 'Follow clinical guidelines / provider judgment')}.
+Suggested follow-up date: ${fmtDate(r.due)}.
+
+Please contact your primary care provider${r.pcpName ? ` (${esc(r.pcpName)})` : ''} to arrange follow-up.
+If you have questions, reply to this message or call our navigation team.
+
+Sincerely,
+Navigator Team
+  `.trim(),
+
+  pcpLetter: (r) => `
+To: ${esc(r.pcpName)}${r.pcpEmail ? ` <${esc(r.pcpEmail)}>` : ''}
+
+Subject: Incidental ${esc(r.bodyPart)} finding — ${esc(r.patientName)} (${esc(r.mrn)})
+
+Patient ${esc(r.patientName)} (${esc(r.mrn)}) has an incidental ${esc(r.bodyPart)} finding:
+"${esc(r.finding)}".
+
+Recommendation: ${esc(r.recommendation || 'Per guideline; please advise')}.
+Suggested due: ${fmtDate(r.due)}.
+
+Kindly review and consider ordering appropriate follow-up.
+  `.trim(),
+
+  inBasket: (r) => `
+FYI: ${esc(r.patientName)} (${esc(r.mrn)}) — incidental ${esc(r.bodyPart)} finding:
+"${esc(r.finding)}"; rec: ${esc(r.recommendation)}; due: ${fmtDate(r.due)}.
+  `.trim(),
+
+  faxCover: (r) => `
+FAX COVER — Incidental Finding
+
+To: ${esc(r.pcpName)}
+Re: ${esc(r.patientName)} (${esc(r.mrn)})
+Finding: ${esc(r.finding)} — ${esc(r.bodyPart)}
+Recommendation: ${esc(r.recommendation)}
+Due: ${fmtDate(r.due)}
+
+Notes: Please review and schedule indicated follow-up.
+  `.trim(),
+};
+
+function generateTemplate(key) {
+  if (!selected) {
+    alert('Select a case first (click “Select” in the table).');
+    return;
+  }
+  const fn = templates[key];
+  const text = fn ? fn(selected) : '';
+  composerOut.value = text;
+
+  // Update download + mailto
+  const blob = new Blob([text], { type: 'text/plain' });
+  downloadTxt.href = URL.createObjectURL(blob);
+
+  const subject = encodeURIComponent(`Incidental finding — ${selected.patientName} (${selected.mrn})`);
+  const body = encodeURIComponent(text);
+  const addr = selected.pcpEmail ? `mailto:${encodeURIComponent(selected.pcpEmail)}` : 'mailto:';
+  mailtoBtn.href = `${addr}?subject=${subject}&body=${body}`;
+}
+
+// --- Events ---
+[filterBodyPart, filterSeverity].forEach(el => el.addEventListener('change', applyFilters));
+searchBox.addEventListener('input', applyFilters);
+reloadBtn.addEventListener('click', () => loadData());
+copyBtn.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(composerOut.value || '');
 });
 
-const API_PROXY_URL = 'https://iridescent-sundae-0a595d.netlify.app/.netlify/functions/api';
-
-// --- Element Selectors ---
-const orgSelect = document.getElementById('org-select');
-const pcpCheckbox = document.getElementById('pcp-checkbox');
-const snippetTextarea = document.getElementById('snippet-textarea');
-const analyzeButton = document.getElementById('analyze-button');
-const loader = document.getElementById('loader');
-const resultsContainer = document.getElementById('results');
-const errorContainer = document.getElementById('error');
-
-async function initializeApp() {
-    if (!orgSelect || !analyzeButton || !snippetTextarea) {
-        console.error("Critical HTML elements are missing. Check IDs in index.html.");
-        displayError("Application failed to load. Please contact support.");
-        return;
-    }
-
-    try {
-        const response = await fetch(API_PROXY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'getOrgs' })
-        });
-        if (!response.ok) throw new Error('Could not retrieve organizations.');
-        
-        const orgs = await response.json();
-        
-        orgSelect.innerHTML = '<option value="">Select an organization...</option>';
-        orgs.forEach(org => {
-            const option = document.createElement('option');
-            option.value = org.id;
-            option.textContent = org.name;
-            orgSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Initialization failed:", error);
-        orgSelect.innerHTML = '<option value="">Could not load organizations</option>';
-        displayError(`Failed to initialize: ${error.message}`);
-    }
-}
-
-analyzeButton.addEventListener('click', async () => {
-    const selectedOrgId = orgSelect.value;
-    const hasPCP = pcpCheckbox.checked;
-    const snippet = snippetTextarea.value;
-
-    if (!selectedOrgId || !snippet) {
-        displayError('Please select an organization and enter a report snippet.');
-        return;
-    }
-
-    loader.style.display = 'block';
-    resultsContainer.style.display = 'none';
-    errorContainer.style.display = 'none';
-    analyzeButton.disabled = true;
-
-    try {
-        const response = await fetch(API_PROXY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'analyzeSnippet',
-                orgId: selectedOrgId,
-                hasPCP: hasPCP,
-                snippet: snippet
-            })
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'An unknown error occurred.');
-        }
-        const data = await response.json();
-        displayResults(data, snippet);
-    } catch (error) {
-        console.error('Analysis error:', error);
-        displayError(`An error occurred during analysis: ${error.message}`);
-    } finally {
-        loader.style.display = 'none';
-        analyzeButton.disabled = false;
-    }
+// --- Boot ---
+loadData().catch(err => {
+  console.error(err);
+  emptyState.style.display = 'block';
+  emptyState.textContent = 'Failed to load /data/cases.json. Add the file and try again.';
 });
-
-function displayResults(data, userSnippet) {
-    errorContainer.style.display = 'none';
-    resultsContainer.innerHTML = `
-        <h3>Analysis and Recommended Plan</h3>
-        <div class="result-item">
-            <strong>Finding:</strong>
-            <p>${userSnippet}</p>
-        </div>
-        <div class="result-item">
-            <strong>Matched Rule Condition:</strong>
-            <p>${data.matchedRule.Finding || 'N/A'}</p>
-        </div>
-         <div class="result-item">
-            <strong>Severity Tier:</strong>
-            <p>${data.matchedRule.Severity || 'N/A'}</p>
-        </div>
-        <div class="result-item">
-            <strong>Recommendation:</strong>
-            <p>${data.actionPlan || 'N/A'}</p>
-        </div>
-        <div class="result-item">
-            <strong>Communication Plan:</strong>
-            <p>Send "<strong>${data.communication.templateName}</strong>" template via <strong>${data.communication.channel}</strong>.</p>
-            <textarea readonly>${data.communication.body}</textarea>
-        </div>
-    `;
-    resultsContainer.style.display = 'block';
-}
-
-function displayError(message) {
-    resultsContainer.style.display = 'none';
-    errorContainer.textContent = message;
-    errorContainer.style.display = 'block';
-}
