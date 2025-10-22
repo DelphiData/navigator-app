@@ -16,72 +16,68 @@
   </header>
 
   <main class="container">
-    <section class="filters">
-      <label>
-        Body Part
-        <select id="filterBodyPart">
-          <option value="">All</option>
-        </select>
-      </label>
-      <label>
-        Severity
-        <select id="filterSeverity">
-          <option value="">All</option>
-          <option value="Red">Red</option>
-          <option value="Amber">Amber</option>
-          <option value="Green">Green</option>
-        </select>
-      </label>
-      <label>
-        Search
-        <input id="searchBox" type="search" placeholder="MRN, name, finding, provider..." />
-      </label>
+    <!-- ==== NEW: TRIAGE ASSISTANT ==== -->
+    <section class="assistant">
+      <h2>Triage Assistant</h2>
+
+      <div class="assistant-grid">
+        <label>
+          Organization
+          <select id="orgSelect">
+            <option value="">Select org…</option>
+          </select>
+        </label>
+
+        <label class="checkbox">
+          <input type="checkbox" id="pcpOnRecord" />
+          <span>PCP on record</span>
+        </label>
+
+        <label class="full">
+          Report snippet
+          <textarea id="snippet" rows="5" placeholder="Paste key sentence(s) from the radiology report…"></textarea>
+        </label>
+
+        <div class="full">
+          <button id="suggestBtn">Suggest Plan</button>
+        </div>
+      </div>
+
+      <div id="suggestion" class="cards">
+        <div class="card">
+          <h3>Recommended Rule</h3>
+          <div id="ruleOut">—</div>
+        </div>
+        <div class="card">
+          <h3>Communication</h3>
+          <div id="commsMeta">—</div>
+          <textarea id="composerOut" rows="10" placeholder="Generated message will appear here…"></textarea>
+          <div class="composer-actions">
+            <button id="copyBtn">Copy</button>
+            <a id="downloadTxt" href="#" download="message.txt">Download .txt</a>
+            <a id="mailtoBtn" href="#" target="_blank" rel="noopener">Open in Email</a>
+          </div>
+        </div>
+      </div>
     </section>
 
+    <!-- Existing table UI remains (optional) -->
     <section class="tablewrap">
       <table id="casesTable">
         <thead>
           <tr>
-            <th>Status</th>
-            <th>Patient</th>
-            <th>MRN</th>
-            <th>Body Part</th>
-            <th>Finding</th>
-            <th>Recommendation</th>
-            <th>Due</th>
-            <th>PCP</th>
-            <th>Actions</th>
+            <th>Status</th><th>Patient</th><th>MRN</th><th>Body Part</th>
+            <th>Finding</th><th>Recommendation</th><th>Due</th><th>PCP</th><th>Actions</th>
           </tr>
         </thead>
-        <tbody id="casesTbody">
-          <!-- rows injected by script.js -->
-        </tbody>
+        <tbody id="casesTbody"></tbody>
       </table>
       <div id="emptyState" class="empty">No cases match your filters.</div>
-    </section>
-
-    <section class="composer">
-      <h2>Communication Composer</h2>
-      <p class="hint">Pick a row, then click a template to generate content with dynamic fields.</p>
-
-      <div class="templates">
-        <button class="templateBtn" data-template="patientLetter">Patient Letter</button>
-        <button class="templateBtn" data-template="pcpLetter">PCP Letter</button>
-        <button class="templateBtn" data-template="inBasket">In-basket Message</button>
-        <button class="templateBtn" data-template="faxCover">Fax Cover + Note</button>
-      </div>
-
-      <textarea id="composerOut" rows="10" placeholder="Generated text will appear here…"></textarea>
-      <div class="composer-actions">
-        <button id="copyBtn">Copy</button>
-        <a id="downloadTxt" href="#" download="message.txt">Download .txt</a>
-        <a id="mailtoBtn" href="#" target="_blank" rel="noopener">Open in Email</a>
-      </div>
     </section>
   </main>
 
   <footer class="foot">
-    <small>Static build (GitHub Pages). Data from <code>/data/cases.json</code>.</small>
+    <small>Static (GitHub Pages). Data from <code>/data/*.json</code>. Secrets never touch the browser.</small>
   </footer>
 
   <script src="./script.js" type="module"></script>
