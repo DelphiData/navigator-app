@@ -1,9 +1,9 @@
-name: Pull 3 Smartsheets → data/
+name: Pull Smartsheets to data
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/30 * * * *"  # every 30 min
+    - cron: "*/30 * * * *"
 
 permissions:
   contents: write
@@ -12,15 +12,20 @@ jobs:
   pull:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Ensure data folder
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Ensure data and scripts directories
+        shell: bash
         run: mkdir -p data scripts
 
       - name: Write puller script
+        shell: bash
         run: |
           cat > scripts/pull-smartsheet.mjs <<'EOF'
           import fs from "fs/promises";
@@ -31,18 +36,20 @@ jobs:
             SHEET_COMMS_ID,
             SHEET_RULES_ID,
             OPENAI_API_KEY,
-            ENABLE_OPENAI = "true"   // set to "false" if you want to skip keyword expansion
+            ENABLE_OPENAI = "true"
           } = process.env;
 
-          if (!SMARTSHEET_ACCESS_TOKEN)
+          if (!SMARTSHEET_ACCESS_TOKEN) {
             throw new Error("Missing SMARTSHEET_ACCESS_TOKEN");
-          if (!SHEET_ORGS_ID || !SHEET_COMMS_ID || !SHEET_RULES_ID)
+          }
+          if (!SHEET_ORGS_ID || !SHEET_COMMS_ID || !SHEET_RULES_ID) {
             throw new Error("Missing one or more sheet IDs");
+          }
 
-          const fetchJson = async (url, opts={}) => {
+          const fetchJson = async (url, opts = {}) => {
             const r = await fetch(url, opts);
             if (!r.ok) {
-              const t = await r.text().catch(()=> "");
+              const t = await r.text().catch(() => "");
               throw new Error(`${url} failed ${r.status}: ${t}`);
             }
             return r.json();
@@ -84,7 +91,7 @@ jobs:
           const comms = flattenRows(commsSheet).map((r) => ({
             TemplateName: r.TemplateName,
             Channel: r.Channel,
-            Recipient: r.Recipient, // "PCP" | "Ordering Provider" | "Specialist" | "Patient" | etc.
+            Recipient: r.Recipient,
             Subject: r.Subject || "",
             Body: r.Body || "",
           }));
@@ -93,67 +100,53 @@ jobs:
           const rulesSheet = await fetchSheet(SHEET_RULES_ID);
           const rules = flattenRows(rulesSheet).map((r) => ({
             RuleID: r.RuleID,
-            Finding: r.Column2,           // e.g., "Adrenal incidentaloma"
-            Severity: r.Severity,         // Green | Amber | Red
-            Condition: r.Condition,       // text condition (size/criteria)
+            Finding: r.Column2,
+            Severity: r.Severity,
+            Condition: r.Condition,
             Recommendation: r.Recommendation,
           }));
 
-          // ---- OPTIONAL: Expand each rule with keywords via OpenAI (runs in Actions; no key in browser)
-          async function expandRulesWithOpenAI(rules) {
+          async function expandRulesWithOpenAI(rulesArr) {
             if (!OPENAI_API_KEY) return null;
             const prompt = `
-You are helping match free-text radiology snippets to rules.
+You help match free-text radiology snippets to rules.
 For EACH rule (Finding, Condition, Recommendation), return:
-- keywords: 12-20 lowercase keywords/phrases (no punctuation) that would be present in a snippet that should map to this rule.
-- specialty: single best specialist (e.g., Endocrinology, Pulmonology, Cardiology, Vascular Surgery, Gastroenterology, Urology, Neurology, Nephrology, Oncology, Primary Care).
+- keywords: 12-20 lowercase keywords/phrases (no punctuation).
+- specialty: single best specialty.
 
-Return strict JSON array with entries:
-{"RuleID":"...", "keywords":["..."], "specialty":"..."}
-
+Return JSON object: {"data":[{"RuleID":"...", "keywords":["..."], "specialty":"..."}]}
 Rules:
-${JSON.stringify(rules.slice(0, 120))}  // cap to keep token usage sane
+${JSON.stringify(rulesArr.slice(0, 120))}
 `.trim();
 
             const res = await fetch("https://api.openai.com/v1/chat/completions", {
               method: "POST",
               headers: {
-                "Authorization": `Bearer ${OPENAI_API_KEY}`,
-                "Content-Type": "application/json"
+                Authorization: `Bearer ${OPENAI_API_KEY}`,
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({
                 model: "gpt-4o-mini",
                 temperature: 0.2,
                 response_format: { type: "json_object" },
-                messages: [{ role: "user", content: prompt }]
-              })
-            }).then(r => r.json());
+                messages: [{ role: "user", content: prompt }],
+              }),
+            }).then((r) => r.json());
 
-            // Expecting { choices: [ { message: { content: '{"data":[..."]}' } } ] }
             const content = res?.choices?.[0]?.message?.content || "{}";
             let obj;
             try { obj = JSON.parse(content); } catch { obj = {}; }
-            const arr = obj.data || obj || [];
-            // Build map RuleID -> {keywords, specialty}
+            const arr = obj.data || [];
             const map = new Map();
             for (const it of arr) {
               if (it?.RuleID) {
                 map.set(it.RuleID, {
                   keywords: Array.isArray(it.keywords) ? it.keywords : [],
-                  specialty: (it.specialty || "").toString()
+                  specialty: (it.specialty || "").toString(),
                 });
               }
             }
             return map;
-          }
-
-          let expandedMap = null;
-          if (ENABLE_OPENAI === "true") {
-            try {
-              expandedMap = await expandRulesWithOpenAI(rules);
-            } catch (e) {
-              console.warn("OpenAI expansion skipped:", e.message);
-            }
           }
 
           const fallbackKeywords = (r) =>
@@ -164,7 +157,15 @@ ${JSON.stringify(rules.slice(0, 120))}  // cap to keep token usage sane
               .filter((w) => w.length > 2)
               .slice(0, 20);
 
-          // Build rulesExpanded
+          let expandedMap = null;
+          if (ENABLE_OPENAI === "true") {
+            try {
+              expandedMap = await expandRulesWithOpenAI(rules);
+            } catch (e) {
+              console.warn("OpenAI expansion skipped:", e.message);
+            }
+          }
+
           const rulesExpanded = rules.map((r) => {
             const exp = expandedMap?.get(r.RuleID);
             return {
@@ -174,11 +175,10 @@ ${JSON.stringify(rules.slice(0, 120))}  // cap to keep token usage sane
               Condition: r.Condition,
               Recommendation: r.Recommendation,
               keywords: exp?.keywords?.length ? exp.keywords : fallbackKeywords(r),
-              specialty: exp?.specialty || ""   // may be blank; frontend has a small mapping fallback
+              specialty: exp?.specialty || "",
             };
           });
 
-          // Write data files used by the browser app
           await fs.writeFile("data/navigatorOrgs.json", JSON.stringify(orgs, null, 2));
           await fs.writeFile("data/commsTemplates.json", JSON.stringify(comms, null, 2));
           await fs.writeFile("data/rulesLibrary.json", JSON.stringify(rules, null, 2));
@@ -196,10 +196,11 @@ ${JSON.stringify(rules.slice(0, 120))}  // cap to keep token usage sane
           SHEET_COMMS_ID: ${{ secrets.SHEET_COMMS_ID }}
           SHEET_RULES_ID: ${{ secrets.SHEET_RULES_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          ENABLE_OPENAI: "true"   # set to "false" to skip LLM keyword expansion
+          ENABLE_OPENAI: "true"
         run: node scripts/pull-smartsheet.mjs
 
       - name: Commit new data
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
