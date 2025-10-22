@@ -47,7 +47,7 @@ async function initializeApp() {
 analyzeButton.addEventListener('click', async () => {
     const selectedOrgId = orgSelect.value;
     const hasPCP = pcpCheckbox.checked;
-    const snippet = snippetTextarea.value; // This is line 48
+    const snippet = snippetTextarea.value;
 
     if (!selectedOrgId || !snippet) {
         displayError('Please select an organization and enter a report snippet.');
