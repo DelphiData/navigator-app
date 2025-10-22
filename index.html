@@ -3,28 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Navigator App</title>
+  <title>Navigator — Incidental Findings</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <header class="topbar">
     <h1>Navigator — Incidental Findings</h1>
     <div class="actions">
-      <button id="reloadBtn" title="Reload data">↻ Reload</button>
-      <a id="downloadCsv" href="#" download="navigator-export.csv">⬇ Export CSV</a>
+      <button id="reloadBtn">↻ Reload</button>
     </div>
   </header>
 
   <main class="container">
-    <!-- ==== NEW: TRIAGE ASSISTANT ==== -->
     <section class="assistant">
-      <h2>Triage Assistant</h2>
-
+      <h2>Triage Assistant (OpenAI)</h2>
       <div class="assistant-grid">
         <label>
           Organization
           <select id="orgSelect">
-            <option value="">Select org…</option>
+            <option value="">Loading…</option>
           </select>
         </label>
 
@@ -35,11 +32,11 @@
 
         <label class="full">
           Report snippet
-          <textarea id="snippet" rows="5" placeholder="Paste key sentence(s) from the radiology report…"></textarea>
+          <textarea id="snippet" rows="6" placeholder="Paste key sentence(s) from the radiology report…"></textarea>
         </label>
 
         <div class="full">
-          <button id="suggestBtn">Suggest Plan</button>
+          <button id="suggestBtn">Suggest Plan (AI)</button>
         </div>
       </div>
 
@@ -51,7 +48,7 @@
         <div class="card">
           <h3>Communication</h3>
           <div id="commsMeta">—</div>
-          <textarea id="composerOut" rows="10" placeholder="Generated message will appear here…"></textarea>
+          <textarea id="composerOut" rows="12" placeholder="Generated message will appear here…"></textarea>
           <div class="composer-actions">
             <button id="copyBtn">Copy</button>
             <a id="downloadTxt" href="#" download="message.txt">Download .txt</a>
@@ -60,24 +57,10 @@
         </div>
       </div>
     </section>
-
-    <!-- Existing table UI remains (optional) -->
-    <section class="tablewrap">
-      <table id="casesTable">
-        <thead>
-          <tr>
-            <th>Status</th><th>Patient</th><th>MRN</th><th>Body Part</th>
-            <th>Finding</th><th>Recommendation</th><th>Due</th><th>PCP</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="casesTbody"></tbody>
-      </table>
-      <div id="emptyState" class="empty">No cases match your filters.</div>
-    </section>
   </main>
 
   <footer class="foot">
-    <small>Static (GitHub Pages). Data from <code>/data/*.json</code>. Secrets never touch the browser.</small>
+    <small>Frontend: GitHub Pages • API: Cloudflare Worker (OpenAI). No secrets in the browser.</small>
   </footer>
 
   <script src="./script.js" type="module"></script>
