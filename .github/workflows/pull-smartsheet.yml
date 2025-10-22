@@ -1,0 +1,125 @@
+name: Pull 3 Smartsheets → data/
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"  # every 30 min
+
+permissions:
+  contents: write
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Ensure data folder
+        run: mkdir -p data scripts
+
+      - name: Write puller script
+        run: |
+          cat > scripts/pull-smartsheet.mjs <<'EOF'
+          import fs from "fs/promises";
+
+          const {
+            SMARTSHEET_ACCESS_TOKEN,
+            SHEET_ORGS_ID,
+            SHEET_COMMS_ID,
+            SHEET_RULES_ID,
+            OPENAI_API_KEY
+          } = process.env;
+
+          if (!SMARTSHEET_ACCESS_TOKEN)
+            throw new Error("Missing SMARTSHEET_ACCESS_TOKEN");
+          if (!SHEET_ORGS_ID || !SHEET_COMMS_ID || !SHEET_RULES_ID)
+            throw new Error("Missing one or more sheet IDs");
+
+          const fetchSheet = async (sheetId) => {
+            const r = await fetch(`https://api.smartsheet.com/2.0/sheets/${sheetId}`, {
+              headers: {
+                Authorization: `Bearer ${SMARTSHEET_ACCESS_TOKEN}`,
+                Accept: "application/json",
+              },
+            });
+            if (!r.ok) throw new Error(`${sheetId} fetch failed ${r.status}`);
+            return r.json();
+          };
+
+          const flattenRows = (sheet) => {
+            const col = new Map(sheet.columns.map((c) => [c.id, c.title]));
+            return sheet.rows.map((row) => {
+              const out = {};
+              for (const c of row.cells) {
+                out[col.get(c.columnId)] = c.displayValue ?? c.value ?? "";
+              }
+              return out;
+            });
+          };
+
+          // 1️⃣ Navigator Orgs
+          const orgsSheet = await fetchSheet(SHEET_ORGS_ID);
+          const orgs = flattenRows(orgsSheet).map((r) => ({
+            OrgName: r.OrgName,
+            AllowsFax: !!(r.Allows || r["Allows Fax"]),
+            FaxNumber: r.FaxNumber,
+            SpecialistsAvailable: r.SpecialistsAvailable?.split(/,\s*/) ?? [],
+          }));
+
+          // 2️⃣ Comms Templates
+          const commsSheet = await fetchSheet(SHEET_COMMS_ID);
+          const comms = flattenRows(commsSheet).map((r) => ({
+            TemplateName: r.TemplateName,
+            Channel: r.Channel,
+            Recipient: r.Recipient,
+            Subject: r.Subject,
+            Body: r.Body,
+          }));
+
+          // 3️⃣ Rules Library
+          const rulesSheet = await fetchSheet(SHEET_RULES_ID);
+          const rules = flattenRows(rulesSheet).map((r) => ({
+            RuleID: r.RuleID,
+            Finding: r.Column2,
+            Severity: r.Severity,
+            Condition: r.Condition,
+            Recommendation: r.Recommendation,
+          }));
+
+          await fs.writeFile(
+            "data/navigatorOrgs.json",
+            JSON.stringify(orgs, null, 2)
+          );
+          await fs.writeFile(
+            "data/commsTemplates.json",
+            JSON.stringify(comms, null, 2)
+          );
+          await fs.writeFile(
+            "data/rulesLibrary.json",
+            JSON.stringify(rules, null, 2)
+          );
+
+          console.log(
+            `Wrote ${orgs.length} orgs, ${comms.length} templates, ${rules.length} rules`
+          );
+          EOF
+
+      - name: Run puller
+        env:
+          SMARTSHEET_ACCESS_TOKEN: ${{ secrets.SMARTSHEET_ACCESS_TOKEN }}
+          SHEET_ORGS_ID: ${{ secrets.SHEET_ORGS_ID }}
+          SHEET_COMMS_ID: ${{ secrets.SHEET_COMMS_ID }}
+          SHEET_RULES_ID: ${{ secrets.SHEET_RULES_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node scripts/pull-smartsheet.mjs
+
+      - name: Commit new data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/*.json
+          git commit -m "Update Smartsheet data" || echo "No changes"
+          git push
