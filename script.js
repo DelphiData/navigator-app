@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- CONFIGURATION ---
     // IMPORTANT: Replace this with the actual URL of your serverless function
     // that you will create in Section 5.
-    const API_PROXY_URL = 'https://mellifluous-bisciotti-a780c4.netlify.app/.netlify/functions/api';
+    const API_PROXY_URL = 'https://iridescent-sundae-0a595d.netlify.app/.netlify/functions/api';
 
     // --- DOM ELEMENT REFERENCES ---
     const orgSelect = document.getElementById('org-select');
