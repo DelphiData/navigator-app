@@ -1,0 +1,10 @@
+name = "navigator-relay"
+main = "src/worker.js"
+compatibility_date = "2024-10-01"
+
+# Set this to your public GitHub Pages URL that serves the JSON data
+# Example: https://delphidata.github.io/navigator-app/data
+[vars]
+DATA_BASE_URL = "https://delphidata.github.io/navigator-app/data"
+
+# You will add OPENAI_API_KEY via "wrangler secret"
