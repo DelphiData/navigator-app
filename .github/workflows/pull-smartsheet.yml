@@ -100,12 +100,14 @@ jobs:
             // 3) Rules Library
             const rulesSheet = await fetchSheet(SHEET_RULES_ID);
             const rules = flattenRows(rulesSheet).map(r => ({
-              RuleID: r.RuleID || '',
-              Finding: r.Column2 || '',
-              Severity: r.Severity || '',
-              Condition: r.Condition || '',
-              Recommendation: r.Recommendation || ''
+            RuleID: r.RuleID || '',
+            Finding: r.Column2 || '',
+            Severity: r.Severity || '',
+            Condition: r.Condition || '',
+            Recommendation: r.Recommendation || '',
+            Logic: r.Logic || ''              // <-- NEW
             }));
+
 
             // -------- Tight, deterministic specialty routing --------
             function specialtyForFinding(findStr, condStr) {
