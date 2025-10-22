@@ -1,5 +1,5 @@
 // === CONFIG: set this to your Cloudflare Worker URL ===
-const API_BASE = "https://navigator-relay.<your-subdomain>.workers.dev";
+const API_BASE = "https://navigator-relay.ljbarg0.workers.dev";
 
 // DOM
 const orgSelect = document.getElementById('orgSelect');
