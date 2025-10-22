@@ -15,195 +15,188 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Ensure data and scripts directories
-        shell: bash
-        run: mkdir -p data scripts
-
-      - name: Write puller script
-        shell: bash
-        run: |
-          cat > scripts/pull-smartsheet.mjs <<'EOF'
-          import fs from "fs/promises";
-
-          const {
-            SMARTSHEET_ACCESS_TOKEN,
-            SHEET_ORGS_ID,
-            SHEET_COMMS_ID,
-            SHEET_RULES_ID,
-            OPENAI_API_KEY,
-            ENABLE_OPENAI = "true"
-          } = process.env;
-
-          if (!SMARTSHEET_ACCESS_TOKEN) {
-            throw new Error("Missing SMARTSHEET_ACCESS_TOKEN");
-          }
-          if (!SHEET_ORGS_ID || !SHEET_COMMS_ID || !SHEET_RULES_ID) {
-            throw new Error("Missing one or more sheet IDs");
-          }
-
-          const fetchJson = async (url, opts = {}) => {
-            const r = await fetch(url, opts);
-            if (!r.ok) {
-              const t = await r.text().catch(() => "");
-              throw new Error(`${url} failed ${r.status}: ${t}`);
-            }
-            return r.json();
-          };
-
-          const fetchSheet = (sheetId) =>
-            fetchJson(`https://api.smartsheet.com/2.0/sheets/${sheetId}`, {
-              headers: {
-                Authorization: `Bearer ${SMARTSHEET_ACCESS_TOKEN}`,
-                Accept: "application/json",
-              },
-            });
-
-          const flattenRows = (sheet) => {
-            const col = new Map(sheet.columns.map((c) => [c.id, c.title]));
-            return sheet.rows.map((row) => {
-              const out = {};
-              for (const c of row.cells) {
-                out[col.get(c.columnId)] = c.displayValue ?? c.value ?? "";
-              }
-              return out;
-            });
-          };
-
-          // 1) Navigator Orgs
-          const orgsSheet = await fetchSheet(SHEET_ORGS_ID);
-          const orgs = flattenRows(orgsSheet).map((r) => ({
-            OrgName: r.OrgName,
-            AllowsFax: Boolean(r.Allows || r["Allows Fax"] || r["Allows…"] || r["Allows Faxing"]),
-            FaxNumber: r.FaxNumber || "",
-            SpecialistsAvailable: (r.SpecialistsAvailable || "")
-              .toString()
-              .split(/,\s*/)
-              .filter(Boolean),
-          }));
-
-          // 2) Comms Templates
-          const commsSheet = await fetchSheet(SHEET_COMMS_ID);
-          const comms = flattenRows(commsSheet).map((r) => ({
-            TemplateName: r.TemplateName,
-            Channel: r.Channel,
-            Recipient: r.Recipient,
-            Subject: r.Subject || "",
-            Body: r.Body || "",
-          }));
-
-          // 3) Rules Library
-          const rulesSheet = await fetchSheet(SHEET_RULES_ID);
-          const rules = flattenRows(rulesSheet).map((r) => ({
-            RuleID: r.RuleID,
-            Finding: r.Column2,
-            Severity: r.Severity,
-            Condition: r.Condition,
-            Recommendation: r.Recommendation,
-          }));
-
-          async function expandRulesWithOpenAI(rulesArr) {
-            if (!OPENAI_API_KEY) return null;
-            const prompt = `
-You help match free-text radiology snippets to rules.
-For EACH rule (Finding, Condition, Recommendation), return:
-- keywords: 12-20 lowercase keywords/phrases (no punctuation).
-- specialty: single best specialty.
-
-Return JSON object: {"data":[{"RuleID":"...", "keywords":["..."], "specialty":"..."}]}
-Rules:
-${JSON.stringify(rulesArr.slice(0, 120))}
-`.trim();
-
-            const res = await fetch("https://api.openai.com/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${OPENAI_API_KEY}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: "gpt-4o-mini",
-                temperature: 0.2,
-                response_format: { type: "json_object" },
-                messages: [{ role: "user", content: prompt }],
-              }),
-            }).then((r) => r.json());
-
-            const content = res?.choices?.[0]?.message?.content || "{}";
-            let obj;
-            try { obj = JSON.parse(content); } catch { obj = {}; }
-            const arr = obj.data || [];
-            const map = new Map();
-            for (const it of arr) {
-              if (it?.RuleID) {
-                map.set(it.RuleID, {
-                  keywords: Array.isArray(it.keywords) ? it.keywords : [],
-                  specialty: (it.specialty || "").toString(),
-                });
-              }
-            }
-            return map;
-          }
-
-          const fallbackKeywords = (r) =>
-            (r.Finding + " " + r.Condition)
-              .toLowerCase()
-              .replace(/[^a-z0-9\s]/g, " ")
-              .split(/\s+/)
-              .filter((w) => w.length > 2)
-              .slice(0, 20);
-
-          let expandedMap = null;
-          if (ENABLE_OPENAI === "true") {
-            try {
-              expandedMap = await expandRulesWithOpenAI(rules);
-            } catch (e) {
-              console.warn("OpenAI expansion skipped:", e.message);
-            }
-          }
-
-          const rulesExpanded = rules.map((r) => {
-            const exp = expandedMap?.get(r.RuleID);
-            return {
-              RuleID: r.RuleID,
-              Finding: r.Finding,
-              Severity: r.Severity,
-              Condition: r.Condition,
-              Recommendation: r.Recommendation,
-              keywords: exp?.keywords?.length ? exp.keywords : fallbackKeywords(r),
-              specialty: exp?.specialty || "",
-            };
-          });
-
-          await fs.writeFile("data/navigatorOrgs.json", JSON.stringify(orgs, null, 2));
-          await fs.writeFile("data/commsTemplates.json", JSON.stringify(comms, null, 2));
-          await fs.writeFile("data/rulesLibrary.json", JSON.stringify(rules, null, 2));
-          await fs.writeFile("data/rulesExpanded.json", JSON.stringify(rulesExpanded, null, 2));
-
-          console.log(
-            `Wrote orgs(${orgs.length}), comms(${comms.length}), rules(${rules.length}), rulesExpanded(${rulesExpanded.length})`
-          );
-          EOF
-
-      - name: Run puller
+      # Runs Node 20 by default; github-script exposes a Node environment with fetch.
+      - name: Pull from Smartsheet and write JSON
+        uses: actions/github-script@v7
         env:
           SMARTSHEET_ACCESS_TOKEN: ${{ secrets.SMARTSHEET_ACCESS_TOKEN }}
           SHEET_ORGS_ID: ${{ secrets.SHEET_ORGS_ID }}
           SHEET_COMMS_ID: ${{ secrets.SHEET_COMMS_ID }}
           SHEET_RULES_ID: ${{ secrets.SHEET_RULES_ID }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          ENABLE_OPENAI: "true"
-        run: node scripts/pull-smartsheet.mjs
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}   # optional
+          ENABLE_OPENAI: "false"                           # set to "true" to use OpenAI expansion
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const {
+              SMARTSHEET_ACCESS_TOKEN,
+              SHEET_ORGS_ID,
+              SHEET_COMMS_ID,
+              SHEET_RULES_ID,
+              OPENAI_API_KEY,
+              ENABLE_OPENAI
+            } = process.env;
+
+            if (!SMARTSHEET_ACCESS_TOKEN) {
+              core.setFailed('Missing SMARTSHEET_ACCESS_TOKEN');
+              return;
+            }
+            if (!SHEET_ORGS_ID || !SHEET_COMMS_ID || !SHEET_RULES_ID) {
+              core.setFailed('Missing one or more Smartsheet IDs');
+              return;
+            }
+
+            async function fetchJson(url, headers = {}) {
+              const res = await fetch(url, { headers });
+              if (!res.ok) {
+                const text = await res.text().catch(() => '');
+                throw new Error(`${url} -> ${res.status} ${res.statusText}\n${text}`);
+              }
+              return res.json();
+            }
+
+            async function fetchSheet(sheetId) {
+              return fetchJson(
+                `https://api.smartsheet.com/2.0/sheets/${sheetId}`,
+                { Authorization: `Bearer ${SMARTSHEET_ACCESS_TOKEN}`, Accept: 'application/json' }
+              );
+            }
+
+            function flattenRows(sheet) {
+              const col = new Map(sheet.columns.map(c => [c.id, c.title]));
+              return (sheet.rows || []).map(row => {
+                const out = {};
+                for (const c of (row.cells || [])) {
+                  const key = col.get(c.columnId);
+                  out[key] = (c.displayValue ?? c.value ?? '');
+                }
+                return out;
+              });
+            }
+
+            // 1) Navigator Orgs
+            const orgsSheet = await fetchSheet(SHEET_ORGS_ID);
+            const orgs = flattenRows(orgsSheet).map(r => ({
+              OrgName: r.OrgName || '',
+              AllowsFax: Boolean(r.Allows || r['Allows Fax'] || r['Allows Faxing']),
+              FaxNumber: r.FaxNumber || '',
+              SpecialistsAvailable: String(r.SpecialistsAvailable || '')
+                .split(/,\s*/)
+                .filter(Boolean)
+            }));
+
+            // 2) Comms Templates
+            const commsSheet = await fetchSheet(SHEET_COMMS_ID);
+            const comms = flattenRows(commsSheet).map(r => ({
+              TemplateName: r.TemplateName || '',
+              Channel: r.Channel || '',
+              Recipient: r.Recipient || '',
+              Subject: r.Subject || '',
+              Body: r.Body || ''
+            }));
+
+            // 3) Rules Library
+            const rulesSheet = await fetchSheet(SHEET_RULES_ID);
+            const rules = flattenRows(rulesSheet).map(r => ({
+              RuleID: r.RuleID || '',
+              Finding: r.Column2 || '',
+              Severity: r.Severity || '',
+              Condition: r.Condition || '',
+              Recommendation: r.Recommendation || ''
+            }));
+
+            // -------- Tight, deterministic specialty routing --------
+            function specialtyForFinding(findStr, condStr) {
+              const s = `${findStr} ${condStr}`.toLowerCase();
+
+              const table = [
+                { spec: 'Endocrinology', keys: ['adrenal', 'adrenaloma', 'adrenocortical', 'pituitary', 'thyroid', 'parathyroid'] },
+                { spec: 'Pulmonology',   keys: ['lung', 'pulmonary', 'nodule', 'emphysema', 'bronch', 'groundglass'] },
+                { spec: 'Cardiology',    keys: ['coronary', 'cac', 'valvular', 'calcification', 'cardiac'] },
+                { spec: 'Vascular Surgery', keys: ['aneurysm', 'aaa', 'taa', 'iliac', 'popliteal', 'aorta'] },
+                { spec: 'Gastroenterology', keys: ['bowel', 'colon', 'appendix', 'gallbladder', 'biliary', 'liver', 'pancreas', 'gastric'] },
+                { spec: 'Urology',       keys: ['kidney', 'renal', 'ureter', 'bladder', 'prostate'] },
+                { spec: 'Neurology',     keys: ['intracranial', 'brain aneurysm', 'cerebral aneurysm'] }
+              ];
+
+              for (const row of table) {
+                if (row.keys.some(k => s.includes(k))) return row.spec;
+              }
+              return 'Primary Care';
+            }
+
+            function tokenize(text) {
+              return String(text || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ')
+                .split(/\s+/).filter(Boolean);
+            }
+
+            function fallbackKeywords(rule) {
+              return Array.from(new Set(tokenize(`${rule.Finding} ${rule.Condition}`))).slice(0, 20);
+            }
+
+            async function openaiExpand(rulesArr) {
+              if (ENABLE_OPENAI !== 'true' || !OPENAI_API_KEY) return new Map();
+              const payload = {
+                model: 'gpt-4o-mini',
+                temperature: 0.2,
+                response_format: { type: 'json_object' },
+                messages: [{
+                  role: 'user',
+                  content:
+                    'Return {"data":[{"RuleID":"...","keywords":["k1","k2"],"specialty":"Name"}]} for the following rules: ' +
+                    JSON.stringify(rulesArr.slice(0, 120))
+                }]
+              };
+              const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              const j = await res.json();
+              const content = j?.choices?.[0]?.message?.content || '{}';
+              let parsed;
+              try { parsed = JSON.parse(content); } catch { parsed = {}; }
+              const arr = parsed.data || [];
+              const map = new Map();
+              for (const it of arr) {
+                if (it && it.RuleID) map.set(it.RuleID, it);
+              }
+              return map;
+            }
+
+            const ai = await openaiExpand(rules);
+            const rulesExpanded = rules.map(r => {
+              const fromAI = ai.get(r.RuleID) || {};
+              const spec = fromAI.specialty || specialtyForFinding(r.Finding, r.Condition);
+              const keywords = Array.isArray(fromAI.keywords) && fromAI.keywords.length
+                ? fromAI.keywords
+                : fallbackKeywords(r);
+              return {
+                RuleID: r.RuleID,
+                Finding: r.Finding,
+                Severity: r.Severity,
+                Condition: r.Condition,
+                Recommendation: r.Recommendation,
+                keywords,
+                specialty: spec
+              };
+            });
+
+            // Write files
+            fs.mkdirSync(path.join(process.cwd(), 'data'), { recursive: true });
+            fs.writeFileSync('data/navigatorOrgs.json', JSON.stringify(orgs, null, 2));
+            fs.writeFileSync('data/commsTemplates.json', JSON.stringify(comms, null, 2));
+            fs.writeFileSync('data/rulesLibrary.json', JSON.stringify(rules, null, 2));
+            fs.writeFileSync('data/rulesExpanded.json', JSON.stringify(rulesExpanded, null, 2));
+
+            core.info(`Wrote orgs(${orgs.length}), comms(${comms.length}), rules(${rules.length}), rulesExpanded(${rulesExpanded.length})`);
 
       - name: Commit new data
-        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/*.json
+          git add data/*.json || true
           git commit -m "Update Smartsheet data" || echo "No changes"
-          git push
+          git push || true
