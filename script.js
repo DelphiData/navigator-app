@@ -1,63 +1,24 @@
-// script.js (ESM)
+// script.js (ESM) — secrets never used here
 
+// ======== existing table bits (kept minimal) ========
 const DATA_URL = './data/cases.json';
 
-// --- State ---
 let allCases = [];
 let filtered = [];
 let selected = null;
 
-// --- DOM ---
 const tbody = document.getElementById('casesTbody');
 const emptyState = document.getElementById('emptyState');
-const filterBodyPart = document.getElementById('filterBodyPart');
-const filterSeverity = document.getElementById('filterSeverity');
-const searchBox = document.getElementById('searchBox');
-const reloadBtn = document.getElementById('reloadBtn');
 const downloadCsv = document.getElementById('downloadCsv');
+const reloadBtn = document.getElementById('reloadBtn');
 
-const composerOut = document.getElementById('composerOut');
-const copyBtn = document.getElementById('copyBtn');
-const downloadTxt = document.getElementById('downloadTxt');
-const mailtoBtn = document.getElementById('mailtoBtn');
-document.querySelectorAll('.templateBtn').forEach(btn =>
-  btn.addEventListener('click', () => generateTemplate(btn.dataset.template))
-);
-
-// --- Utilities ---
-const fmtDate = iso => {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d)) return iso;
-  return d.toLocaleDateString();
-};
-const esc = s => (s ?? '').toString();
-
-function mapCaseFields(row) {
-  // 🔁 Adjust this mapper if your JSON keys differ.
-  // Expected shape per row (examples in /data/cases.json):
-  // {
-  //   id, patientName, mrn, bodyPart, finding, recommendation,
-  //   severity, due, pcpName, pcpEmail
-  // }
-  return {
-    id: row.id,
-    patientName: row.patientName,
-    mrn: row.mrn,
-    bodyPart: row.bodyPart,
-    finding: row.finding,
-    recommendation: row.recommendation,
-    severity: row.severity, // Red | Amber | Green
-    due: row.due,           // ISO date
-    pcpName: row.pcpName,
-    pcpEmail: row.pcpEmail || '',
-  };
-}
+reloadBtn?.addEventListener('click', () => {
+  loadEverything().catch(console.error);
+});
 
 function toCsv(rows) {
-  const headers = [
-    'id','patientName','mrn','bodyPart','finding','recommendation','severity','due','pcpName','pcpEmail'
-  ];
+  if (!rows?.length) return '';
+  const headers = Object.keys(rows[0]);
   const lines = [headers.join(',')];
   for (const r of rows) {
     const vals = headers.map(h => {
@@ -69,15 +30,20 @@ function toCsv(rows) {
   return lines.join('\n');
 }
 
-// --- Rendering ---
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return Number.isNaN(d) ? iso : d.toLocaleDateString();
+}
+
 function renderTable(rows) {
+  if (!tbody) return;
   tbody.innerHTML = '';
-  if (!rows.length) {
+  if (!rows?.length) {
     emptyState.style.display = 'block';
     return;
   }
   emptyState.style.display = 'none';
-
   for (const r of rows) {
     const tr = document.createElement('tr');
 
@@ -88,169 +54,231 @@ function renderTable(rows) {
     status.appendChild(b);
     tr.appendChild(status);
 
-    const patient = document.createElement('td');
-    patient.textContent = r.patientName || '';
-    tr.appendChild(patient);
+    const tds = ['patientName','mrn','bodyPart','finding','recommendation','due','pcpName'];
+    for (const k of tds) {
+      const td = document.createElement('td');
+      td.textContent = k === 'due' ? fmtDate(r[k]) : (r[k] || '');
+      tr.appendChild(td);
+    }
 
-    const mrn = document.createElement('td');
-    mrn.textContent = r.mrn || '';
-    tr.appendChild(mrn);
-
-    const bp = document.createElement('td');
-    bp.textContent = r.bodyPart || '';
-    tr.appendChild(bp);
-
-    const finding = document.createElement('td');
-    finding.textContent = r.finding || '';
-    tr.appendChild(finding);
-
-    const rec = document.createElement('td');
-    rec.textContent = r.recommendation || '';
-    tr.appendChild(rec);
-
-    const due = document.createElement('td');
-    due.textContent = fmtDate(r.due);
-    tr.appendChild(due);
-
-    const pcp = document.createElement('td');
-    pcp.textContent = r.pcpName || '';
-    tr.appendChild(pcp);
-
-    const actions = document.createElement('td');
-    const pick = document.createElement('button');
-    pick.textContent = 'Select';
-    pick.addEventListener('click', () => {
-      selected = r;
-      highlightSelected(tr);
-    });
-    actions.appendChild(pick);
-    tr.appendChild(actions);
+    const act = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.textContent = 'Select';
+    btn.onclick = () => { selected = r; tr.style.outline = '2px solid var(--accent)'; };
+    act.appendChild(btn);
+    tr.appendChild(act);
 
     tbody.appendChild(tr);
   }
 }
 
-function highlightSelected(tr) {
-  tbody.querySelectorAll('tr').forEach(row => row.style.outline = '');
-  tr.style.outline = '2px solid var(--accent)';
+// ======== NEW: Triage Assistant logic ========
+const orgSelect = document.getElementById('orgSelect');
+const pcpOnRecord = document.getElementById('pcpOnRecord');
+const snippetEl = document.getElementById('snippet');
+const suggestBtn = document.getElementById('suggestBtn');
+const ruleOut = document.getElementById('ruleOut');
+const commsMeta = document.getElementById('commsMeta');
+const composerOut = document.getElementById('composerOut');
+const copyBtn = document.getElementById('copyBtn');
+const downloadTxt = document.getElementById('downloadTxt');
+const mailtoBtn = document.getElementById('mailtoBtn');
+
+let ORGS = [];
+let COMMS = [];
+let RULES = [];
+let RULES_EXPANDED = [];
+
+async function loadEverything() {
+  // cases.json is optional — ok if missing at first
+  try {
+    const raw = await fetch(DATA_URL, { cache: 'no-store' });
+    if (raw.ok) {
+      const arr = await raw.json();
+      allCases = arr;
+      filtered = arr;
+      renderTable(arr);
+      const csv = toCsv(arr);
+      downloadCsv.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    }
+  } catch (_) {}
+
+  // required data files
+  const [orgs, comms, rules, rulesEx] = await Promise.all([
+    fetch('./data/navigatorOrgs.json').then(r=>r.json()),
+    fetch('./data/commsTemplates.json').then(r=>r.json()),
+    fetch('./data/rulesExpanded.json').then(r=>r.json()).catch(()=>[]),
+    fetch('./data/rulesLibrary.json').then(r=>r.json())
+  ]);
+
+  ORGS = orgs;
+  COMMS = comms;
+  RULES_EXPANDED = Array.isArray(rulesEx) ? rulesEx : [];
+  RULES = rules;
+
+  populateOrgSelect(ORGS);
 }
 
-// --- Filtering ---
-function applyFilters() {
-  const term = searchBox.value.trim().toLowerCase();
-  const bp = filterBodyPart.value;
-  const sev = filterSeverity.value;
-
-  filtered = allCases.filter(r => {
-    if (bp && r.bodyPart !== bp) return false;
-    if (sev && r.severity !== sev) return false;
-    if (!term) return true;
-    const hay = `${r.patientName} ${r.mrn} ${r.bodyPart} ${r.finding} ${r.recommendation} ${r.pcpName}`.toLowerCase();
-    return hay.includes(term);
-  });
-
-  renderTable(filtered);
-  const csv = toCsv(filtered);
-  const blob = new Blob([csv], { type: 'text/csv' });
-  downloadCsv.href = URL.createObjectURL(blob);
+function populateOrgSelect(orgs) {
+  if (!orgSelect) return;
+  orgSelect.innerHTML = '<option value="">Select org…</option>' +
+    orgs.map(o => `<option value="${encodeURIComponent(o.OrgName)}">${o.OrgName}</option>`).join('');
 }
 
-// --- Data load ---
-async function loadData() {
-  const res = await fetch(DATA_URL, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`Failed to fetch ${DATA_URL}`);
-  const raw = await res.json();
-  allCases = raw.map(mapCaseFields);
-  populateBodyPartFilter(allCases);
-  applyFilters();
+const BASIC_SPECIALTY_MAP = [
+  { includes: ['adrenal','adrenaloma','endocrine'], specialty: 'Endocrinology' },
+  { includes: ['lung','pulmonary','emphysema','nodule'], specialty: 'Pulmonology' },
+  { includes: ['cac','valvular','aortic valve','coronary','calcium','cardiac'], specialty: 'Cardiology' },
+  { includes: ['aneurysm','aorta','aaa','taa','iliac'], specialty: 'Vascular Surgery' },
+  { includes: ['bowel','colon','ileum','appendix','gallbladder','liver','biliary','pancreas','gi','gastric'], specialty: 'Gastroenterology' },
+  { includes: ['kidney','renal','urolith','ureter','bladder','prostate'], specialty: 'Urology' }
+];
+
+function guessSpecialty(snippetLower) {
+  for (const m of BASIC_SPECIALTY_MAP) {
+    if (m.includes.some(k => snippetLower.includes(k))) return m.specialty;
+  }
+  return 'Primary Care';
 }
 
-function populateBodyPartFilter(rows) {
-  const opts = new Set(rows.map(r => r.bodyPart).filter(Boolean));
-  filterBodyPart.innerHTML = '<option value="">All</option>' +
-    [...opts].sort().map(v => `<option value="${v}">${v}</option>`).join('');
+function tokenize(text) {
+  return text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
 }
 
-// --- Templates ---
-const templates = {
-  patientLetter: (r) => `
-Dear ${esc(r.patientName)},
+// Score snippet against rule keywords + some fields
+function scoreRule(rule, snippet) {
+  const kw = (rule.keywords && rule.keywords.length ? rule.keywords : tokenize(rule.Finding + ' ' + rule.Condition));
+  const sTokens = new Set(tokenize(snippet));
+  let score = 0;
+  for (const w of kw) if (sTokens.has(w)) score += 2;
+  // small boost if words from Finding/Condition appear
+  for (const w of tokenize(rule.Finding + ' ' + rule.Condition)) if (sTokens.has(w)) score += 1;
+  // severity weight: Red>Amber>Green
+  const sevW = rule.Severity === 'Red' ? 2 : rule.Severity === 'Amber' ? 1 : 0;
+  score += sevW;
+  return score;
+}
 
-Your recent imaging showed an incidental finding involving the ${esc(r.bodyPart)}:
-"${esc(r.finding)}".
+// Choose comms template by recipient priority and org capabilities
+function pickTemplate({ hasPCP, org, specialty, rulesSuggestion }) {
+  const orgAllowsFax = !!org?.AllowsFax;
+  const candidates = COMMS.slice();
 
-Recommendation: ${esc(r.recommendation || 'Follow clinical guidelines / provider judgment')}.
-Suggested follow-up date: ${fmtDate(r.due)}.
+  // recipient priority
+  const wanted = [];
+  if (hasPCP) wanted.push('PCP');
+  else wanted.push('Ordering Provider');
 
-Please contact your primary care provider${r.pcpName ? ` (${esc(r.pcpName)})` : ''} to arrange follow-up.
-If you have questions, reply to this message or call our navigation team.
+  // If no PCP/OP or specialty specifically recommended, allow Specialist
+  wanted.push('Specialist', 'Patient');
 
-Sincerely,
-Navigator Team
-  `.trim(),
+  // Channel preference: In-Basket if exists; otherwise Fax if org allows; otherwise Letter/Phone
+  const channelPref = ['In-Basket'];
+  if (orgAllowsFax) channelPref.push('Fax');
+  channelPref.push('Letter','Phone','Portal');
 
-  pcpLetter: (r) => `
-To: ${esc(r.pcpName)}${r.pcpEmail ? ` <${esc(r.pcpEmail)}>` : ''}
+  // Try templateName heuristic if rulesSuggestion exists
+  const byRuleName = rulesSuggestion?.RuleID
+    ? candidates.find(t => (t.TemplateName||'').toLowerCase().includes(rulesSuggestion.RuleID.toLowerCase()))
+    : null;
+  if (byRuleName) return byRuleName;
 
-Subject: Incidental ${esc(r.bodyPart)} finding — ${esc(r.patientName)} (${esc(r.mrn)})
+  // Filter by recipient priority
+  for (const rec of wanted) {
+    const recMatches = candidates.filter(t => (t.Recipient||'').toLowerCase() === rec.toLowerCase());
+    if (recMatches.length) {
+      // among those, prefer channel order
+      for (const ch of channelPref) {
+        const m = recMatches.find(t => (t.Channel||'').toLowerCase() === ch.toLowerCase());
+        if (m) return m;
+      }
+      return recMatches[0];
+    }
+  }
+  // fallback
+  return candidates[0];
+}
 
-Patient ${esc(r.patientName)} (${esc(r.mrn)}) has an incidental ${esc(r.bodyPart)} finding:
-"${esc(r.finding)}".
+function fillTemplateFields(text, ctx) {
+  return (text || '')
+    .replace(/\{\{\s*currentDate\s*\}\}/g, new Date().toLocaleDateString())
+    .replace(/\{\{\s*orgName\s*\}\}/g, ctx.orgName || '')
+    .replace(/\{\{\s*specialist\s*\}\}/g, ctx.specialist || '')
+    .replace(/\{\{\s*pcpName\s*\}\}/g, ctx.pcpName || '{{pcpName}}')
+    .replace(/\{\{\s*patientName\s*\}\}/g, ctx.patientName || '{{patientName}}')
+    .replace(/\{\{\s*mrn\s*\}\}/g, ctx.mrn || '{{mrn}}')
+    .trim();
+}
 
-Recommendation: ${esc(r.recommendation || 'Per guideline; please advise')}.
-Suggested due: ${fmtDate(r.due)}.
+function renderSuggestion({ rule, template, org, specialist }) {
+  const ruleHtml = rule
+    ? `<div><b>${rule.Finding}</b> <span class="badge ${rule.Severity?.toLowerCase()}">${rule.Severity}</span></div>
+       <div style="margin-top:6px"><i>Condition:</i> ${rule.Condition || '—'}</div>
+       <div style="margin-top:6px"><i>Recommendation:</i> ${rule.Recommendation || '—'}</div>`
+    : 'No rule matched.';
+  ruleOut.innerHTML = ruleHtml;
 
-Kindly review and consider ordering appropriate follow-up.
-  `.trim(),
-
-  inBasket: (r) => `
-FYI: ${esc(r.patientName)} (${esc(r.mrn)}) — incidental ${esc(r.bodyPart)} finding:
-"${esc(r.finding)}"; rec: ${esc(r.recommendation)}; due: ${fmtDate(r.due)}.
-  `.trim(),
-
-  faxCover: (r) => `
-FAX COVER — Incidental Finding
-
-To: ${esc(r.pcpName)}
-Re: ${esc(r.patientName)} (${esc(r.mrn)})
-Finding: ${esc(r.finding)} — ${esc(r.bodyPart)}
-Recommendation: ${esc(r.recommendation)}
-Due: ${fmtDate(r.due)}
-
-Notes: Please review and schedule indicated follow-up.
-  `.trim(),
-};
-
-function generateTemplate(key) {
-  if (!selected) {
-    alert('Select a case first (click “Select” in the table).');
+  if (!template) {
+    commsMeta.textContent = 'No communication template matched.';
+    composerOut.value = '';
     return;
   }
-  const fn = templates[key];
-  const text = fn ? fn(selected) : '';
-  composerOut.value = text;
+  const ctx = {
+    orgName: org?.OrgName || '',
+    specialist: specialist || '',
+    pcpName: '', patientName: '', mrn: ''
+  };
+  const subject = fillTemplateFields(template.Subject, ctx);
+  const body = fillTemplateFields(template.Body, ctx);
 
-  // Update download + mailto
-  const blob = new Blob([text], { type: 'text/plain' });
+  commsMeta.textContent = `${template.Channel} → ${template.Recipient} | ${template.TemplateName}`;
+  composerOut.value = (subject ? `Subject: ${subject}\n\n` : '') + body;
+
+  // Download/email helpers
+  const blob = new Blob([composerOut.value], { type: 'text/plain' });
   downloadTxt.href = URL.createObjectURL(blob);
-
-  const subject = encodeURIComponent(`Incidental finding — ${selected.patientName} (${selected.mrn})`);
-  const body = encodeURIComponent(text);
-  const addr = selected.pcpEmail ? `mailto:${encodeURIComponent(selected.pcpEmail)}` : 'mailto:';
-  mailtoBtn.href = `${addr}?subject=${subject}&body=${body}`;
+  const mSubject = encodeURIComponent(subject || `Incidental finding`);
+  const mBody = encodeURIComponent(composerOut.value);
+  mailtoBtn.href = `mailto:?subject=${mSubject}&body=${mBody}`;
 }
 
-// --- Events ---
-[filterBodyPart, filterSeverity].forEach(el => el.addEventListener('change', applyFilters));
-searchBox.addEventListener('input', applyFilters);
-reloadBtn.addEventListener('click', () => loadData());
-copyBtn.addEventListener('click', async () => {
-  await navigator.clipboard.writeText(composerOut.value || '');
+suggestBtn?.addEventListener('click', () => {
+  const orgName = decodeURIComponent(orgSelect.value || '');
+  const org = ORGS.find(o => o.OrgName === orgName) || null;
+  const hasPCP = !!pcpOnRecord.checked;
+  const snippet = (snippetEl.value || '').trim();
+  if (!orgName || !snippet) {
+    alert('Please select an organization and paste a report snippet.');
+    return;
+  }
+  const sLower = snippet.toLowerCase();
+
+  // Rule matching
+  const pool = (RULES_EXPANDED.length ? RULES_EXPANDED : RULES);
+  let best = null, bestScore = -1;
+  for (const r of pool) {
+    const sc = scoreRule(r, sLower);
+    if (sc > bestScore) { best = r; bestScore = sc; }
+  }
+
+  // Specialist decision
+  let specialist = '';
+  if (best?.specialty) specialist = best.specialty;
+  else specialist = guessSpecialty(sLower);
+
+  // If org lacks that specialist, fall back to PCP/OP
+  const orgHasSpecialist = org?.SpecialistsAvailable?.some(s => s.toLowerCase() === specialist.toLowerCase());
+  if (!orgHasSpecialist) specialist = '';
+
+  // Template selection
+  const template = pickTemplate({ hasPCP, org, specialty: specialist, rulesSuggestion: best });
+
+  renderSuggestion({ rule: best, template, org, specialist });
 });
 
-// --- Boot ---
-loadData().catch(err => {
-  console.error(err);
-  emptyState.style.display = 'block';
-  emptyState.textContent = 'Failed to load /data/cases.json. Add the file and try again.';
+copyBtn?.addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(composerOut.value || ''); } catch {}
 });
+
+// ======== boot ========
+loadEverything().catch(console.error);
