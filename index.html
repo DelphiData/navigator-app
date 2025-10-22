@@ -1,51 +1,89 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incidental Findings Navigator</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Navigator App</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Incidental Findings Navigator</h1>
-            <p>Enter details from the report to get a recommended action plan.</p>
-        </header>
-
-        <main>
-            <div class="card">
-                <h2>Case Details</h2>
-                <div class="form-group">
-                    <label for="org-select">1. Select Healthcare Organization:</label>
-                    <select id="org-select">
-                        <option>Loading organizations...</option>
-                    </select>
-                </div>
-
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="pcp-checkbox">
-                    <label for="pcp-checkbox">2. Patient has a Primary Care Provider (PCP) on record.</label>
-                </div>
-
-                <div class="form-group">
-                    <label for="snippet-textarea">3. Paste Relevant Report Snippet:</label>
-                    <textarea id="snippet-textarea" rows="4" placeholder="e.g., 'A 1.2 cm indeterminate solid mass is seen in the upper pole of the right kidney.'"></textarea>
-                </div>
-
-                <button id="analyze-button">Analyze Snippet</button>
-            </div>
-
-            <div id="loader" class="loader" style="display: none;"></div>
-            
-            <div id="error" class="error-message" style="display: none;"></div>
-
-            <div id="results" class="results-container" style="display: none;">
-                <!-- Results will be dynamically inserted here -->
-            </div>
-        </main>
+  <header class="topbar">
+    <h1>Navigator — Incidental Findings</h1>
+    <div class="actions">
+      <button id="reloadBtn" title="Reload data">↻ Reload</button>
+      <a id="downloadCsv" href="#" download="navigator-export.csv">⬇ Export CSV</a>
     </div>
+  </header>
 
-    <script src="script.js" defer></script>
+  <main class="container">
+    <section class="filters">
+      <label>
+        Body Part
+        <select id="filterBodyPart">
+          <option value="">All</option>
+        </select>
+      </label>
+      <label>
+        Severity
+        <select id="filterSeverity">
+          <option value="">All</option>
+          <option value="Red">Red</option>
+          <option value="Amber">Amber</option>
+          <option value="Green">Green</option>
+        </select>
+      </label>
+      <label>
+        Search
+        <input id="searchBox" type="search" placeholder="MRN, name, finding, provider..." />
+      </label>
+    </section>
+
+    <section class="tablewrap">
+      <table id="casesTable">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Patient</th>
+            <th>MRN</th>
+            <th>Body Part</th>
+            <th>Finding</th>
+            <th>Recommendation</th>
+            <th>Due</th>
+            <th>PCP</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="casesTbody">
+          <!-- rows injected by script.js -->
+        </tbody>
+      </table>
+      <div id="emptyState" class="empty">No cases match your filters.</div>
+    </section>
+
+    <section class="composer">
+      <h2>Communication Composer</h2>
+      <p class="hint">Pick a row, then click a template to generate content with dynamic fields.</p>
+
+      <div class="templates">
+        <button class="templateBtn" data-template="patientLetter">Patient Letter</button>
+        <button class="templateBtn" data-template="pcpLetter">PCP Letter</button>
+        <button class="templateBtn" data-template="inBasket">In-basket Message</button>
+        <button class="templateBtn" data-template="faxCover">Fax Cover + Note</button>
+      </div>
+
+      <textarea id="composerOut" rows="10" placeholder="Generated text will appear here…"></textarea>
+      <div class="composer-actions">
+        <button id="copyBtn">Copy</button>
+        <a id="downloadTxt" href="#" download="message.txt">Download .txt</a>
+        <a id="mailtoBtn" href="#" target="_blank" rel="noopener">Open in Email</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <small>Static build (GitHub Pages). Data from <code>/data/cases.json</code>.</small>
+  </footer>
+
+  <script src="./script.js" type="module"></script>
 </body>
 </html>
