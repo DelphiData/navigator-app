@@ -53,3 +53,37 @@ body {
 .card h3 { margin: 0 0 8px; }
 #commsMeta { color: var(--muted); margin-bottom: 8px; }
 .foot { text-align: center; color: var(--muted); margin: 20px 0 40px; }
+/* ===== Modal ===== */
+.modal.hidden { display: none; }
+.modal { position: fixed; inset: 0; z-index: 50; }
+.modal__backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
+}
+.modal__panel {
+  position: relative; margin: 8vh auto 0; width: min(640px, 90vw);
+  background: #0f1e2e; border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+.modal__header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.modal__body { padding: 14px; display: grid; gap: 12px; }
+.modal__footer { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--border); }
+.modal__close {
+  background: transparent; color: var(--muted); border: none; font-size: 16px; cursor: pointer;
+}
+.modal__close:hover { color: var(--text); }
+
+.form-row { display: grid; gap: 6px; }
+.form-row label { font-size: 13px; color: var(--muted); }
+.form-row input, .form-row select {
+  width: 100%; background: #0e1c2a; color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px; padding: 9px 10px;
+}
+.form-row .hint { font-size: 12px; color: var(--muted); }
+
+.btn {
+  background: #13273c; color: var(--text); border: 1px solid var(--border);
+  padding: 8px 12px; border-radius: 10px; cursor: pointer; box-shadow: var(--shadow);
+}
+.btn.primary:hover { border-color: var(--accent); }
+.btn.secondary { background: #0e1c2a; }
+
