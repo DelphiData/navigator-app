@@ -57,6 +57,24 @@
         </div>
       </div>
     </section>
+    <!-- Q&A Modal -->
+  <div id="qaModal" class="modal hidden" aria-hidden="true" role="dialog" aria-labelledby="qaTitle">
+    <div class="modal__backdrop" data-modal-close></div>
+      <div class="modal__panel" role="document">
+        <div class="modal__header">
+      <h3 id="qaTitle">Additional info needed</h3>
+      <button class="modal__close" title="Close" data-modal-close>✕</button>
+    </div>
+    <form id="qaForm" class="modal__body">
+      <!-- dynamic questions will render here -->
+    </form>
+    <div class="modal__footer">
+      <button id="qaCancel" type="button" class="btn secondary" data-modal-close>Cancel</button>
+      <button id="qaSubmit" type="submit" form="qaForm" class="btn primary">Continue</button>
+    </div>
+  </div>
+</div>
+
   </main>
 
   <footer class="foot">
