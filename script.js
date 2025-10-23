@@ -15,6 +15,23 @@ const copyBtn = document.getElementById('copyBtn');
 const downloadTxt = document.getElementById('downloadTxt');
 const mailtoBtn = document.getElementById('mailtoBtn');
 
+// Modal elements
+const qaModal = document.getElementById('qaModal');
+const qaForm = document.getElementById('qaForm');
+const qaSubmit = document.getElementById('qaSubmit');
+const qaCloseEls = document.querySelectorAll('[data-modal-close]');
+
+function openModal() {
+  qaModal.classList.remove('hidden');
+  qaModal.setAttribute('aria-hidden', 'false');
+}
+function closeModal() {
+  qaModal.classList.add('hidden');
+  qaModal.setAttribute('aria-hidden', 'true');
+  qaForm.replaceChildren(); // clear previous questions
+}
+qaCloseEls.forEach(el => el.addEventListener('click', closeModal));
+
 async function loadOrgs() {
   orgSelect.innerHTML = `<option>Loading…</option>`;
   try {
@@ -75,6 +92,76 @@ function renderSuggestion(j, { orgName, snippet }) {
   mailtoBtn.href = `mailto:?subject=${mSubject}&body=${mBody}`;
 }
 
+// Render dynamic questions inside the modal
+function renderQuestions(questions) {
+  qaForm.replaceChildren();
+  for (const q of questions) {
+    const row = document.createElement('div');
+    row.className = 'form-row';
+
+    const label = document.createElement('label');
+    label.textContent = q.label || q.id;
+
+    let input;
+    if (q.type === 'boolean') {
+      // boolean as select for clarity
+      input = document.createElement('select');
+      input.innerHTML = `
+        <option value="">Select…</option>
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+      `;
+    } else if (q.type === 'number') {
+      input = document.createElement('input');
+      input.type = 'number';
+      input.step = 'any';
+      input.placeholder = '0';
+      input.inputMode = 'decimal';
+    } else {
+      input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = '';
+    }
+
+    input.name = q.id;
+    input.dataset.qType = q.type || 'text';
+    row.appendChild(label);
+    row.appendChild(input);
+
+    if (q.hint) {
+      const hint = document.createElement('div');
+      hint.className = 'hint';
+      hint.textContent = q.hint;
+      row.appendChild(hint);
+    }
+
+    qaForm.appendChild(row);
+  }
+}
+
+// Extract answers from the modal form with validation
+function collectAnswers() {
+  const answers = {};
+  const inputs = qaForm.querySelectorAll('input, select');
+  for (const el of inputs) {
+    const id = el.name;
+    const t = el.dataset.qType || 'text';
+    let val = el.value;
+
+    if (t === 'boolean') {
+      if (val === '') return { error: `Please select Yes/No for "${id}".` };
+      val = val === 'true';
+    } else if (t === 'number') {
+      if (val === '') return { error: `Please enter a number for "${id}".` };
+      const num = Number(val);
+      if (!Number.isFinite(num)) return { error: `Invalid number for "${id}".` };
+      val = num;
+    }
+    answers[id] = val;
+  }
+  return { answers };
+}
+
 suggestBtn?.addEventListener('click', async () => {
   const orgName = decodeURIComponent(orgSelect.value || '');
   const snippet = (snippetEl.value || '').trim();
@@ -99,33 +186,35 @@ suggestBtn?.addEventListener('click', async () => {
     const j = await r.json();
     if (j.error) throw new Error(j.error);
 
-    // If Worker says we need extra answers, prompt and re-call
+    // If Worker says we need extra answers, show modal → collect → re-POST
     if (j.needsQuestions && Array.isArray(j.questions)) {
-      const answers = {};
-      for (const q of j.questions) {
-        let val;
-        if (q.type === 'number') {
-          const raw = prompt(`${q.label}:`, '0');
-          val = raw === null ? null : Number(raw);
-        } else if (q.type === 'boolean') {
-          val = confirm(`${q.label} (OK = Yes, Cancel = No)`);
-        } else {
-          val = prompt(`${q.label}:`, '');
-          if (val === null) val = '';
+      renderQuestions(j.questions);
+      openModal();
+
+      // Ensure we only bind once
+      qaForm.onsubmit = async (ev) => {
+        ev.preventDefault();
+        const { answers, error } = collectAnswers();
+        if (error) {
+          alert(error);
+          return;
         }
-        answers[q.id] = val;
-      }
 
-      const r2 = await fetch(`${API_BASE}/suggest`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orgName, pcpOnRecord: pcp, snippet, answers })
-      });
-      const j2 = await r2.json();
-      if (j2.error) throw new Error(j2.error);
+        commsMeta.textContent = 'Applying answers…';
+        closeModal();
 
-      renderSuggestion(j2, { orgName, snippet });
-      return;
+        const r2 = await fetch(`${API_BASE}/suggest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orgName, pcpOnRecord: pcp, snippet, answers })
+        });
+        const j2 = await r2.json();
+        if (j2.error) throw new Error(j2.error);
+
+        renderSuggestion(j2, { orgName, snippet });
+      };
+
+      return; // wait for modal submit
     }
 
     // Otherwise render the final suggestion directly
