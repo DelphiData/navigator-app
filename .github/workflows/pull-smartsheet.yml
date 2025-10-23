@@ -97,52 +97,69 @@ jobs:
               Body: r.Body || ''
             }));
 
-            // 3) Rules Library
+            // 3) Rules Library (+ Logic column)
             const rulesSheet = await fetchSheet(SHEET_RULES_ID);
             const rules = flattenRows(rulesSheet).map(r => ({
-            RuleID: r.RuleID || '',
-            Finding: r.Column2 || '',
-            Severity: r.Severity || '',
-            Condition: r.Condition || '',
-            Recommendation: r.Recommendation || '',
-            Logic: r.Logic || ''              // <-- NEW
+              RuleID: r.RuleID || '',
+              Finding: r.Column2 || '',
+              Severity: r.Severity || '',
+              Condition: r.Condition || '',
+              Recommendation: r.Recommendation || '',
+              Logic: r.Logic || ''   // <-- NEW: carry the Logic JSON (string) from Smartsheet
             }));
 
-
-            // -------- Tight, deterministic specialty routing --------
+            // -------- Simple organ + specialty helpers (deterministic) --------
+            const ORGAN_TABLE = [
+              { organ: 'kidney',    keys: ['kidney','renal','ureter','bosniak'] },
+              { organ: 'spleen',    keys: ['spleen','splenic'] },
+              { organ: 'liver',     keys: ['liver','hepatic','hepat'] },
+              { organ: 'adrenal',   keys: ['adrenal','adrenocortical','adenoma'] },
+              { organ: 'lung',      keys: ['lung','pulmonary','nodule','emphysema','groundglass'] },
+              { organ: 'aorta',     keys: ['aorta','aneurysm','aaa','taa','iliac','popliteal'] },
+              { organ: 'gallbladder', keys: ['gallbladder','gb','biliary'] },
+              { organ: 'pancreas',  keys: ['pancreas','pancreatic'] },
+              { organ: 'bowel',     keys: ['bowel','colon','appendix','ileum','colitis'] },
+              { organ: 'thyroid',   keys: ['thyroid','ti-rads','tirads'] },
+              { organ: 'breast',    keys: ['breast','bi-rads','birads'] },
+              { organ: 'brain',     keys: ['intracranial','cerebral'] },
+              { organ: 'heart',     keys: ['coronary','cac','valvular','cardiac'] }
+            ];
+            function organFromText(findStr, condStr) {
+              const s = `${findStr} ${condStr}`.toLowerCase();
+              for (const row of ORGAN_TABLE) {
+                if (row.keys.some(k => s.includes(k))) return row.organ;
+              }
+              return 'general';
+            }
             function specialtyForFinding(findStr, condStr) {
               const s = `${findStr} ${condStr}`.toLowerCase();
-
               const table = [
-                { spec: 'Endocrinology', keys: ['adrenal', 'adrenaloma', 'adrenocortical', 'pituitary', 'thyroid', 'parathyroid'] },
-                { spec: 'Pulmonology',   keys: ['lung', 'pulmonary', 'nodule', 'emphysema', 'bronch', 'groundglass'] },
-                { spec: 'Cardiology',    keys: ['coronary', 'cac', 'valvular', 'calcification', 'cardiac'] },
-                { spec: 'Vascular Surgery', keys: ['aneurysm', 'aaa', 'taa', 'iliac', 'popliteal', 'aorta'] },
-                { spec: 'Gastroenterology', keys: ['bowel', 'colon', 'appendix', 'gallbladder', 'biliary', 'liver', 'pancreas', 'gastric'] },
-                { spec: 'Urology',       keys: ['kidney', 'renal', 'ureter', 'bladder', 'prostate'] },
-                { spec: 'Neurology',     keys: ['intracranial', 'brain aneurysm', 'cerebral aneurysm'] }
+                { spec: 'Endocrinology', keys: ['adrenal','pituitary','thyroid','parathyroid'] },
+                { spec: 'Pulmonology',   keys: ['lung','pulmonary','nodule','emphysema','bronch','groundglass'] },
+                { spec: 'Cardiology',    keys: ['coronary','cac','valvular','calcification','cardiac'] },
+                { spec: 'Vascular Surgery', keys: ['aneurysm','aaa','taa','iliac','popliteal','aorta'] },
+                { spec: 'Gastroenterology', keys: ['bowel','colon','appendix','gallbladder','biliary','liver','pancreas','gastric'] },
+                { spec: 'Urology',       keys: ['kidney','renal','ureter','bladder','prostate'] },
+                { spec: 'Neurology',     keys: ['intracranial','cerebral'] }
               ];
-
               for (const row of table) {
                 if (row.keys.some(k => s.includes(k))) return row.spec;
               }
               return 'Primary Care';
             }
-
             function tokenize(text) {
               return String(text || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ')
                 .split(/\s+/).filter(Boolean);
             }
-
             function fallbackKeywords(rule) {
               return Array.from(new Set(tokenize(`${rule.Finding} ${rule.Condition}`))).slice(0, 20);
             }
 
+            // -------- Optional OpenAI expansion (keywords + specialty) --------
             async function openaiExpand(rulesArr) {
               if (ENABLE_OPENAI !== 'true' || !OPENAI_API_KEY) return new Map();
               const payload = {
                 model: 'gpt-4o-mini',
-                temperature: 0.2,
                 response_format: { type: 'json_object' },
                 messages: [{
                   role: 'user',
@@ -169,20 +186,29 @@ jobs:
             }
 
             const ai = await openaiExpand(rules);
+
+            // -------- Build rulesExpanded with Logic and safe defaults --------
             const rulesExpanded = rules.map(r => {
               const fromAI = ai.get(r.RuleID) || {};
-              const spec = fromAI.specialty || specialtyForFinding(r.Finding, r.Condition);
+              const specialty = fromAI.specialty || specialtyForFinding(r.Finding, r.Condition);
               const keywords = Array.isArray(fromAI.keywords) && fromAI.keywords.length
                 ? fromAI.keywords
                 : fallbackKeywords(r);
+              const organ = organFromText(r.Finding, r.Condition);
+
               return {
                 RuleID: r.RuleID,
                 Finding: r.Finding,
                 Severity: r.Severity,
                 Condition: r.Condition,
                 Recommendation: r.Recommendation,
-                keywords,
-                specialty: spec
+                // enrichment fields expected by your Worker/frontend:
+                organ,                          // <-- NEW default organ
+                aliases: [],                    // <-- safe default (can be enriched later)
+                negatives: [],                  // <-- safe default (can be enriched later)
+                specialty,                      // <-- as before (AI or deterministic)
+                keywords,                       // <-- as before (AI or fallback)
+                Logic: r.Logic || ''            // <-- NEW pass-through of Smartsheet Logic JSON (string)
               };
             });
 
