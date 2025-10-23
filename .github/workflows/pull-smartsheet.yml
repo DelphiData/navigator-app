@@ -117,7 +117,7 @@ jobs:
               { organ: 'lung',      keys: ['lung','pulmonary','nodule','emphysema','groundglass'] },
               { organ: 'aorta',     keys: ['aorta','aneurysm','aaa','taa','iliac','popliteal'] },
               { organ: 'gallbladder', keys: ['gallbladder','gb','biliary'] },
-              { organ: 'pancreas',  keys: ['pancreas','pancreatic'] },
+              { organ: 'pancreas',  keys: ['pancreas','pancreatic'] }, 
               { organ: 'bowel',     keys: ['bowel','colon','appendix','ileum','colitis'] },
               { organ: 'thyroid',   keys: ['thyroid','ti-rads','tirads'] },
               { organ: 'breast',    keys: ['breast','bi-rads','birads'] },
