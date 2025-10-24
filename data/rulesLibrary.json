@@ -77,7 +77,7 @@
     "Severity": "Green",
     "Condition": "Mild CAC (1-99) or mild valve disease.",
     "Recommendation": "Inform patient and PCP. Recommend routine cardiovascular risk management.",
-    "Logic": "{\n  \"name\": \"Managed pathway heuristics\",\n  \"ask\": [\n    { \"id\": \"meds\",    \"type\": \"text\",    \"label\": \"Relevant meds/therapies noted? (e.g., statin, ezetimibe, PCSK9)\" },\n    { \"id\": \"history\", \"type\": \"text\",    \"label\": \"Known history or follow-up noted? (e.g., CAD, ASCVD, prior stent/CABG, cardiology follow-up)\" }\n  ],\n  \"managedHints\": [\n    \"statin\",\n    \"ezetimibe\",\n    \"pcsk9\",\n    \"ascvd\",\n    \"cad\",\n    \"prior stent\",\n    \"bypass\",\n    \"cabg\",\n    \"cardiology follow up\",\n    \"already on treatment\",\n    \"known disease\"\n  ],\n  \"managedRoute\": { \"recipient\": \"PCP\", \"channel\": \"In-Basket\" }\n}"
+    "Logic": "{\n  \"name\": \"Pre-check questions\",\n  \"ask\": [\n    { \"id\": \"meds\",    \"type\": \"text\", \"label\": \"Relevant meds/therapies noted? (e.g., statin/ezetimibe/PCSK9)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known history/follow-up? (e.g., CAD/ASCVD, prior stent/CABG, cardiology follow-up)\" }\n  ],\n  \"managedHints\": [\n    \"statin\", \"ezetimibe\", \"pcsk9\",\n    \"ascvd\", \"cad\", \"prior stent\", \"stent\",\n    \"bypass\", \"cabg\", \"cardiology follow up\",\n    \"already on treatment\", \"known disease\"\n  ]\n}"
   },
   {
     "RuleID": "CV-A-01",
@@ -85,7 +85,7 @@
     "Severity": "Amber",
     "Condition": "Moderate CAC (100-400) or moderate valve disease.",
     "Recommendation": "Recommend cardiology consultation for risk stratification and management.",
-    "Logic": "{\n  \"name\": \"Managed pathway heuristics\",\n  \"ask\": [\n    { \"id\": \"meds\",    \"type\": \"text\",    \"label\": \"Relevant meds/therapies noted? (e.g., statin, ezetimibe, PCSK9)\" },\n    { \"id\": \"history\", \"type\": \"text\",    \"label\": \"Known history or follow-up noted? (e.g., CAD, ASCVD, prior stent/CABG, cardiology follow-up)\" }\n  ],\n  \"managedHints\": [\n    \"statin\",\n    \"ezetimibe\",\n    \"pcsk9\",\n    \"ascvd\",\n    \"cad\",\n    \"prior stent\",\n    \"bypass\",\n    \"cabg\",\n    \"cardiology follow up\",\n    \"already on treatment\",\n    \"known disease\"\n  ],\n  \"managedRoute\": { \"recipient\": \"PCP\", \"channel\": \"In-Basket\" }\n}"
+    "Logic": "{\n  \"name\": \"Pre-check questions\",\n  \"ask\": [\n    { \"id\": \"meds\",    \"type\": \"text\", \"label\": \"Relevant meds/therapies noted? (e.g., statin/ezetimibe/PCSK9)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known history/follow-up? (e.g., CAD/ASCVD, prior stent/CABG, cardiology follow-up)\" }\n  ],\n  \"managedHints\": [\n    \"statin\", \"ezetimibe\", \"pcsk9\",\n    \"ascvd\", \"cad\", \"prior stent\", \"stent\",\n    \"bypass\", \"cabg\", \"cardiology follow up\",\n    \"already on treatment\", \"known disease\"\n  ]\n}"
   },
   {
     "RuleID": "CV-B-Managed",
@@ -101,7 +101,7 @@
     "Severity": "Red",
     "Condition": "Severe CAC (>400 Agatston) or severe valve stenosis/regurg.",
     "Recommendation": "Urgent cardiology consultation.",
-    "Logic": "{\n  \"name\": \"Managed pathway heuristics\",\n  \"ask\": [\n    { \"id\": \"meds\",    \"type\": \"text\",    \"label\": \"Relevant meds/therapies noted? (e.g., statin, ezetimibe, PCSK9)\" },\n    { \"id\": \"history\", \"type\": \"text\",    \"label\": \"Known history or follow-up noted? (e.g., CAD, ASCVD, prior stent/CABG, cardiology follow-up)\" }\n  ],\n  \"managedHints\": [\n    \"statin\",\n    \"ezetimibe\",\n    \"pcsk9\",\n    \"ascvd\",\n    \"cad\",\n    \"prior stent\",\n    \"bypass\",\n    \"cabg\",\n    \"cardiology follow up\",\n    \"already on treatment\",\n    \"known disease\"\n  ],\n  \"managedRoute\": { \"recipient\": \"PCP\", \"channel\": \"In-Basket\" }\n}"
+    "Logic": "{\n  \"name\": \"Pre-check questions\",\n  \"ask\": [\n    { \"id\": \"meds\",    \"type\": \"text\", \"label\": \"Relevant meds/therapies noted? (e.g., statin/ezetimibe/PCSK9)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known history/follow-up? (e.g., CAD/ASCVD, prior stent/CABG, cardiology follow-up)\" }\n  ],\n  \"managedHints\": [\n    \"statin\", \"ezetimibe\", \"pcsk9\",\n    \"ascvd\", \"cad\", \"prior stent\", \"stent\",\n    \"bypass\", \"cabg\", \"cardiology follow up\",\n    \"already on treatment\", \"known disease\"\n  ]\n}"
   },
   {
     "RuleID": "EM-G-01",
