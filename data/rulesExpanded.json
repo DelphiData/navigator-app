@@ -242,7 +242,7 @@
       "under",
       "management"
     ],
-    "Logic": "{\n  \"name\": \"Managed pathway heuristics\",\n  \"ask\": [\n    { \"id\": \"meds\",    \"type\": \"text\",    \"label\": \"Relevant meds/therapies noted? (e.g., statin, ezetimibe, PCSK9)\" },\n    { \"id\": \"history\", \"type\": \"text\",    \"label\": \"Known history or follow-up noted? (e.g., CAD, ASCVD, prior stent/CABG, cardiology follow-up)\" }\n  ],\n  \"managedHints\": [\n    \"statin\",\n    \"ezetimibe\",\n    \"pcsk9\",\n    \"ascvd\",\n    \"cad\",\n    \"prior stent\",\n    \"bypass\",\n    \"cabg\",\n    \"cardiology follow up\",\n    \"already on treatment\",\n    \"known disease\"\n  ],\n  \"managedRoute\": { \"recipient\": \"PCP\", \"channel\": \"In-Basket\" }\n}"
+    "Logic": ""
   },
   {
     "RuleID": "CV-R-01",
