@@ -242,8 +242,8 @@
   },
   {
     "RuleID": "CV-A-Managed",
-    "Finding": "CAC — Known/Managed",
-    "Severity": "Amber",
+    "Finding": "CAC/Valvular — Known/Managed",
+    "Severity": "Blue",
     "Condition": "Incidental CAC with known CAD or already under management",
     "Recommendation": "Manage under CAD/secondary prevention pathway or verify statin intensity/adherence with PCP.",
     "organ": "heart",
@@ -252,6 +252,7 @@
     "specialty": "Cardiology",
     "keywords": [
       "cac",
+      "valvular",
       "known",
       "managed",
       "incidental",
@@ -341,6 +342,32 @@
       "signs",
       "of",
       "exacerbation"
+    ],
+    "Logic": ""
+  },
+  {
+    "RuleID": "",
+    "Finding": "Emphysema/COPD-Known/Managed",
+    "Severity": "Blue",
+    "Condition": "On patients known problem list or being managed by pulmonologist.",
+    "Recommendation": "Manage under COPD/exacerbation prevention pathway or verify medication adherence with PCP.",
+    "organ": "lung",
+    "aliases": [],
+    "negatives": [],
+    "specialty": "Pulmonology",
+    "keywords": [
+      "emphysema",
+      "copd",
+      "known",
+      "managed",
+      "on",
+      "patients",
+      "problem",
+      "list",
+      "or",
+      "being",
+      "by",
+      "pulmonologist"
     ],
     "Logic": ""
   },

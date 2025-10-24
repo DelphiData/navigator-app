@@ -89,8 +89,8 @@
   },
   {
     "RuleID": "CV-A-Managed",
-    "Finding": "CAC — Known/Managed",
-    "Severity": "Amber",
+    "Finding": "CAC/Valvular — Known/Managed",
+    "Severity": "Blue",
     "Condition": "Incidental CAC with known CAD or already under management",
     "Recommendation": "Manage under CAD/secondary prevention pathway or verify statin intensity/adherence with PCP.",
     "Logic": "{\n  \"name\": \"CAC branching (no numeric score)\",\n  \"inputs\": [\n    { \"id\": \"onStatin\", \"type\": \"boolean\", \"label\": \"Patient currently on a statin?\" },\n    { \"id\": \"hasCAD\",  \"type\": \"boolean\", \"label\": \"Known CAD/ASCVD on problem list?\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"hasCAD === true\",\n      \"useRuleId\": \"CV-A-Managed\",\n      \"setSeverity\": \"Amber\",\n      \"setRecommendation\": \"Known CAD/ASCVD — follow CAD/secondary prevention; ensure high-intensity statin and risk-factor optimization.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Cardiology\", \"channel\": \"In-Basket\" },\n      \"note\": \"Known CAD → managed pathway.\"\n    },\n    {\n      \"when\": \"hasCAD === false && onStatin === false\",\n      \"useRuleId\": \"CV-A-Managed\",\n      \"setSeverity\": \"Amber\",\n      \"setRecommendation\": \"No CAD history and not on a statin — PCP to initiate/optimize statin therapy; address risk factors.\",\n      \"route\": { \"recipient\": \"PCP\", \"channel\": \"In-Basket\" },\n      \"note\": \"High risk but not on statin → PCP management.\"\n    },\n    {\n      \"when\": \"hasCAD === false && onStatin === true\",\n      \"useRuleId\": \"CV-A-Managed\",\n      \"setSeverity\": \"Amber\",\n      \"setRecommendation\": \"No CAD history and already on a statin — PCP to verify intensity and adherence; routine follow-up.\",\n      \"route\": { \"recipient\": \"PCP\", \"channel\": \"In-Basket\" },\n      \"note\": \"Already on statin → PCP follow-up.\"\n    }\n  ]\n}"
@@ -125,6 +125,14 @@
     "Severity": "Red",
     "Condition": "Severe emphysema with signs of exacerbation.",
     "Recommendation": "Recommend urgent PCP or pulmonology follow-up.",
+    "Logic": ""
+  },
+  {
+    "RuleID": "",
+    "Finding": "Emphysema/COPD-Known/Managed",
+    "Severity": "Blue",
+    "Condition": "On patients known problem list or being managed by pulmonologist.",
+    "Recommendation": "Manage under COPD/exacerbation prevention pathway or verify medication adherence with PCP.",
     "Logic": ""
   },
   {
