@@ -1,4 +1,3 @@
-// === CONFIG: set this to your Cloudflare Worker URL ===
 const API_BASE = "https://navigator-relay.ljbarg0.workers.dev";
 
 // DOM
@@ -18,14 +17,23 @@ const downloadTxt = document.getElementById('downloadTxt');
 const mailtoBtn   = document.getElementById('mailtoBtn');
 
 // Modal elements
-const qaModal  = document.getElementById('qaModal');
-const qaForm   = document.getElementById('qaForm');
-const qaSubmit = document.getElementById('qaSubmit');
-const qaCancel = document.getElementById('qaCancel');
+const qaModal   = document.getElementById('qaModal');
+const qaForm    = document.getElementById('qaForm');
+const qaSubmit  = document.getElementById('qaSubmit');
+const qaCancel  = document.getElementById('qaCancel');
+const modalX    = document.querySelector('[data-modal-close]');
+const modalBg   = document.querySelector('.modal__backdrop');
 
-// --- utilities ---
-function show(el)  { el?.classList?.remove('hidden'); el?.setAttribute?.('aria-hidden','false'); }
-function hide(el)  { el?.classList?.add('hidden');    el?.setAttribute?.('aria-hidden','true'); }
+function show(el) {
+  if (!el) return;
+  el.classList.remove('hidden');
+  el.setAttribute('aria-hidden','false');
+}
+function hide(el) {
+  if (!el) return;
+  el.classList.add('hidden');
+  el.setAttribute('aria-hidden','true');
+}
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
 function fillFields(text, ctx) {
@@ -54,19 +62,21 @@ async function loadOrgs() {
   }
 }
 
-// --- modal Q&A ---
+// ---------- Modal (robust) ----------
 function renderQuestions(questions) {
-  qaForm.innerHTML = ''; // clear
+  qaForm.innerHTML = '';
   for (const q of questions) {
     const id = q.id;
     const label = q.label || id;
     const type = (q.type || 'text').toLowerCase();
 
-    const field = document.createElement('label');
-    field.className = 'qa-field';
+    const wrap = document.createElement('div');
+    wrap.className = 'qa-field';
 
-    const span = document.createElement('span');
-    span.textContent = label;
+    const lab = document.createElement('label');
+    lab.htmlFor = `qa_${id}`;
+    lab.className = 'qa-label';
+    lab.textContent = label;
 
     let input;
     if (type === 'boolean') {
@@ -81,56 +91,77 @@ function renderQuestions(questions) {
       input.type = 'text';
       input.placeholder = 'e.g., "on statin", "CAD on problem list", "unknown"';
     }
-    input.name = id;
     input.id = `qa_${id}`;
+    input.name = id;
+    input.className = 'qa-input';
 
-    field.appendChild(span);
-    field.appendChild(input);
-    qaForm.appendChild(field);
+    wrap.appendChild(lab);
+    wrap.appendChild(input);
+    qaForm.appendChild(wrap);
   }
 }
-
 function collectAnswers() {
   const ans = {};
-  const elements = qaForm.querySelectorAll('input, select, textarea');
-  elements.forEach(el => {
+  qaForm.querySelectorAll('input, select, textarea').forEach(el => {
     let v = el.value;
-    if (v === '') return; // omit empty -> worker treats as missing
-    if (v === 'true') v = true;
+    if (v === '') return;
+    if (v === 'true')  v = true;
     if (v === 'false') v = false;
     ans[el.name] = v;
   });
   return ans;
 }
-
-function showQAModalAndCollect(questions) {
+function openModal(questions) {
   renderQuestions(questions);
   show(qaModal);
+  // focus first input safely
+  setTimeout(() => {
+    const first = qaForm.querySelector('input,select,textarea');
+    first?.focus();
+  }, 0);
+}
+function closeModal() {
+  hide(qaModal);
+}
 
+qaForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+});
+qaCancel?.addEventListener('click', (e) => {
+  e.preventDefault();
+  closeModal();
+});
+modalX?.addEventListener('click', (e) => { e.preventDefault(); closeModal(); });
+modalBg?.addEventListener('click', (e) => { e.preventDefault(); closeModal(); });
+
+// Promise wrapper so caller can await answers
+function showQAModalAndCollect(questions) {
+  openModal(questions);
   return new Promise((resolve) => {
-    // Ensure we don't submit the page
     const onSubmit = (ev) => {
       ev.preventDefault();
       const answers = collectAnswers();
-      hide(qaModal);
+      qaSubmit.removeEventListener('click', onSubmit);
       qaForm.removeEventListener('submit', onSubmit);
-      qaCancel?.removeEventListener('click', onCancel);
-      resolve(answers); // may be {}
+      qaCancel.removeEventListener('click', onCancel);
+      closeModal();
+      resolve(answers);
     };
     const onCancel = (ev) => {
       ev.preventDefault();
-      hide(qaModal);
+      qaSubmit.removeEventListener('click', onSubmit);
       qaForm.removeEventListener('submit', onSubmit);
-      qaCancel?.removeEventListener('click', onCancel);
-      resolve({}); // send empty object; worker will continue with no cues
+      qaCancel.removeEventListener('click', onCancel);
+      closeModal();
+      resolve({}); // empty → Worker proceeds without cues
     };
-
+    qaSubmit.addEventListener('click', onSubmit);
     qaForm.addEventListener('submit', onSubmit);
-    qaCancel?.addEventListener('click', onCancel);
+    qaCancel.addEventListener('click', onCancel);
   });
 }
 
-// --- main flow ---
+// ---------- Suggest Flow ----------
 async function suggestFlow() {
   const orgName = decodeURIComponent(orgSelect.value || '');
   const snippet  = (snippetEl.value || '').trim();
@@ -148,7 +179,7 @@ async function suggestFlow() {
   try {
     let payload = { orgName, pcpOnRecord: pcp, snippet };
 
-    // 1st call — may return needsQuestions
+    // first call: may request questions
     let r = await fetch(`${API_BASE}/suggest`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -156,7 +187,6 @@ async function suggestFlow() {
     let j = await r.json();
     if (j.error) throw new Error(j.error);
 
-    // If worker requests Q&A, show modal and re-call with answers
     if (j.needsQuestions && Array.isArray(j.questions)) {
       const answers = await showQAModalAndCollect(j.questions);
       payload = { ...payload, answers };
@@ -168,7 +198,6 @@ async function suggestFlow() {
       if (j.error) throw new Error(j.error);
     }
 
-    // Render final result
     const rule = j.chosenRule || {};
     const routing = j.routing || {};
     const message = j.message || {};
@@ -207,10 +236,9 @@ async function suggestFlow() {
   }
 }
 
-// --- wire up ---
+// Wire-up
 reloadBtn?.addEventListener('click', (e) => { e.preventDefault(); loadOrgs(); });
 suggestBtn?.addEventListener('click', (e) => { e.preventDefault(); suggestFlow(); });
 copyBtn?.addEventListener('click', async (e) => { e.preventDefault(); try { await navigator.clipboard.writeText(composerOut.value || ''); } catch {} });
 
-// Boot
 loadOrgs();
