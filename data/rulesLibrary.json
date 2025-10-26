@@ -53,7 +53,7 @@
     "Severity": "Green",
     "Condition": "Mild",
     "Recommendation": "likely reactive thickening. Clinically correlate. If asymptomatic no further action needed.",
-    "Logic": ""
+    "Logic": "{\n  \"name\": \"Managed IBD cue\",\n  \"inputs\": [\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"IBD meds? (e.g., mesalamine, azathioprine, biologic: infliximab/adalimumab)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known IBD or GI follow-up? (e.g., Crohn’s/UC clinic, GI on file)\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(crohn|ulcerative colitis|ibd)/i.test(history) || /(infliximab|adalimumab|mesalamine|azathioprine|vedolizumab|ustekinumab)/i.test(meds)\",\n      \"useRuleId\": \"BW-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known IBD under GI management; continue plan with gastroenterology.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Gastroenterology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
     "RuleID": "BW-A-01",
@@ -61,7 +61,7 @@
     "Severity": "Amber",
     "Condition": "Diffuse or segmental thickening (inflammatory).",
     "Recommendation": "Recommend clinical correlation for inflammatory bowel disease. Consider gastroenterology referral.",
-    "Logic": ""
+    "Logic": "{\n  \"name\": \"Managed IBD cue\",\n  \"inputs\": [\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"IBD meds? (e.g., mesalamine, azathioprine, biologic: infliximab/adalimumab)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known IBD or GI follow-up? (e.g., Crohn’s/UC clinic, GI on file)\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(crohn|ulcerative colitis|ibd)/i.test(history) || /(infliximab|adalimumab|mesalamine|azathioprine|vedolizumab|ustekinumab)/i.test(meds)\",\n      \"useRuleId\": \"BW-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known IBD under GI management; continue plan with gastroenterology.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Gastroenterology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
     "RuleID": "BW-R-01",
@@ -69,7 +69,7 @@
     "Severity": "Red",
     "Condition": "Focal",
     "Recommendation": "asymmetric thickening suggestive of malignancy. Recommend colonoscopy or dedicated CT enterography. Urgent gastroenterology referral.",
-    "Logic": ""
+    "Logic": "{\n  \"name\": \"Managed IBD cue\",\n  \"inputs\": [\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"IBD meds? (e.g., mesalamine, azathioprine, biologic: infliximab/adalimumab)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known IBD or GI follow-up? (e.g., Crohn’s/UC clinic, GI on file)\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(crohn|ulcerative colitis|ibd)/i.test(history) || /(infliximab|adalimumab|mesalamine|azathioprine|vedolizumab|ustekinumab)/i.test(meds)\",\n      \"useRuleId\": \"BW-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known IBD under GI management; continue plan with gastroenterology.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Gastroenterology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
     "RuleID": "CV-G-01",
@@ -109,7 +109,7 @@
     "Severity": "Green",
     "Condition": "Mild or trace emphysema.",
     "Recommendation": "Recommend smoking cessation counseling if applicable. Inform PCP.",
-    "Logic": ""
+    "Logic": "{\n  \"name\": \"Managed COPD cue\",\n  \"inputs\": [\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"Pulmonary meds? (e.g., LABA/LAMA/ICS, home O2)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known COPD/PFTs/pulmonology follow-up?\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(pulmonology|pft|pulmonary clinic)/i.test(history) || /(tiotropium|umeclidinium|salmeterol|formoterol|budesonide|fluticasone|triple inhaler)/i.test(meds)\",\n      \"useRuleId\": \"EM-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known COPD under pulmonology/PCP management; continue current regimen and follow-up.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Pulmonology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
     "RuleID": "EM-A-01",
@@ -117,7 +117,7 @@
     "Severity": "Amber",
     "Condition": "Moderate emphysema.",
     "Recommendation": "Recommend PCP follow-up for pulmonary function testing and management.",
-    "Logic": ""
+    "Logic": "{\n  \"name\": \"Managed COPD cue\",\n  \"inputs\": [\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"Pulmonary meds? (e.g., LABA/LAMA/ICS, home O2)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known COPD/PFTs/pulmonology follow-up?\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(pulmonology|pft|pulmonary clinic)/i.test(history) || /(tiotropium|umeclidinium|salmeterol|formoterol|budesonide|fluticasone|triple inhaler)/i.test(meds)\",\n      \"useRuleId\": \"EM-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known COPD under pulmonology/PCP management; continue current regimen and follow-up.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Pulmonology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
     "RuleID": "EM-R-01",
@@ -125,7 +125,7 @@
     "Severity": "Red",
     "Condition": "Severe emphysema with signs of exacerbation.",
     "Recommendation": "Recommend urgent PCP or pulmonology follow-up.",
-    "Logic": ""
+    "Logic": "{\n  \"name\": \"Managed COPD cue\",\n  \"inputs\": [\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"Pulmonary meds? (e.g., LABA/LAMA/ICS, home O2)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known COPD/PFTs/pulmonology follow-up?\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(pulmonology|pft|pulmonary clinic)/i.test(history) || /(tiotropium|umeclidinium|salmeterol|formoterol|budesonide|fluticasone|triple inhaler)/i.test(meds)\",\n      \"useRuleId\": \"EM-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known COPD under pulmonology/PCP management; continue current regimen and follow-up.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Pulmonology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
     "RuleID": "EM-B-Managed",
@@ -213,7 +213,7 @@
     "Severity": "Green",
     "Condition": "Trace ILA.",
     "Recommendation": "Incidental finding. Inform PCP. No specific follow-up required.",
-    "Logic": ""
+    "Logic": "{\n  \"name\": \"Managed ILD cue\",\n  \"inputs\": [\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known ILD/ILD clinic? Prior HRCT, rheum overlap, or pulmonology care?\" },\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"Antifibrotics/steroids? (e.g., nintedanib, pirfenidone)\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(ild (clinic|program)|pulmonology|rheumatology)/i.test(history) || /(nintedanib|pirfenidone|prednisone)/i.test(meds)\",\n      \"useRuleId\": \"IL-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known ILD under specialty care; continue current management and scheduled imaging.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Pulmonology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
     "RuleID": "IL-A-01",
@@ -221,7 +221,7 @@
     "Severity": "Amber",
     "Condition": "Non-fibrotic ILA involving >5% of lung zone.",
     "Recommendation": "Recommend pulmonology consultation for evaluation.",
-    "Logic": ""
+    "Logic": "{\n  \"name\": \"Managed ILD cue\",\n  \"inputs\": [\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known ILD/ILD clinic? Prior HRCT, rheum overlap, or pulmonology care?\" },\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"Antifibrotics/steroids? (e.g., nintedanib, pirfenidone)\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(ild (clinic|program)|pulmonology|rheumatology)/i.test(history) || /(nintedanib|pirfenidone|prednisone)/i.test(meds)\",\n      \"useRuleId\": \"IL-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known ILD under specialty care; continue current management and scheduled imaging.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Pulmonology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
     "RuleID": "IL-R-01",
@@ -229,7 +229,7 @@
     "Severity": "Red",
     "Condition": "Fibrotic ILA with honeycombing.",
     "Recommendation": "Urgent referral to pulmonology for management of likely interstitial lung disease.",
-    "Logic": ""
+    "Logic": "{\n  \"name\": \"Managed ILD cue\",\n  \"inputs\": [\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known ILD/ILD clinic? Prior HRCT, rheum overlap, or pulmonology care?\" },\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"Antifibrotics/steroids? (e.g., nintedanib, pirfenidone)\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(ild (clinic|program)|pulmonology|rheumatology)/i.test(history) || /(nintedanib|pirfenidone|prednisone)/i.test(meds)\",\n      \"useRuleId\": \"IL-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known ILD under specialty care; continue current management and scheduled imaging.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Pulmonology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
     "RuleID": "LV-G-01",
