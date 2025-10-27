@@ -1,244 +1,273 @@
+// === CONFIG: your Cloudflare Worker base ===
 const API_BASE = "https://navigator-relay.ljbarg0.workers.dev";
 
 // DOM
-const orgSelect   = document.getElementById('orgSelect');
-const pcpOnRecord = document.getElementById('pcpOnRecord');
-const snippetEl   = document.getElementById('snippet');
+const orgSelect   = document.getElementById("orgSelect");
+const pcpOnRecord = document.getElementById("pcpOnRecord");
+const snippetEl   = document.getElementById("snippet");
+const suggestBtn  = document.getElementById("suggestBtn");
+const reloadBtn   = document.getElementById("reloadBtn");
 
-const suggestBtn  = document.getElementById('suggestBtn');
-const reloadBtn   = document.getElementById('reloadBtn');
+const ruleOut     = document.getElementById("ruleOut");
+const commsMeta   = document.getElementById("commsMeta");
+const composerOut = document.getElementById("composerOut");
+const copyBtn     = document.getElementById("copyBtn");
+const downloadTxt = document.getElementById("downloadTxt");
+const mailtoBtn   = document.getElementById("mailtoBtn");
 
-const ruleOut     = document.getElementById('ruleOut');
-const commsMeta   = document.getElementById('commsMeta');
-const composerOut = document.getElementById('composerOut');
+// Q&A modal
+const qaModal   = document.getElementById("qaModal");
+const qaForm    = document.getElementById("qaForm");
+const qaSubmit  = document.getElementById("qaSubmit");
+const qaCancel  = document.getElementById("qaCancel");
 
-const copyBtn     = document.getElementById('copyBtn');
-const downloadTxt = document.getElementById('downloadTxt');
-const mailtoBtn   = document.getElementById('mailtoBtn');
-
-// Modal elements
-const qaModal   = document.getElementById('qaModal');
-const qaForm    = document.getElementById('qaForm');
-const qaSubmit  = document.getElementById('qaSubmit');
-const qaCancel  = document.getElementById('qaCancel');
-const modalX    = document.querySelector('[data-modal-close]');
-const modalBg   = document.querySelector('.modal__backdrop');
-
-function show(el) {
-  if (!el) return;
-  el.classList.remove('hidden');
-  el.setAttribute('aria-hidden','false');
+// ---------- helpers ----------
+function showModal() {
+  qaModal?.classList.remove("hidden");
+  qaModal?.setAttribute("aria-hidden", "false");
 }
-function hide(el) {
-  if (!el) return;
-  el.classList.add('hidden');
-  el.setAttribute('aria-hidden','true');
+function hideModal() {
+  qaModal?.classList.add("hidden");
+  qaModal?.setAttribute("aria-hidden", "true");
+  // clear form fields so next time it's fresh
+  if (qaForm) qaForm.innerHTML = "";
 }
-function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
 function fillFields(text, ctx) {
-  return (text || '')
+  return (text || "")
     .replace(/\{\{\s*currentDate\s*\}\}/g, new Date().toLocaleDateString())
-    .replace(/\{\{\s*orgName\s*\}\}/g, ctx.orgName || '')
-    .replace(/\{\{\s*specialist\s*\}\}/g, ctx.specialist || '')
-    .replace(/\{\{\s*pcpName\s*\}\}/g, ctx.pcpName || '{{pcpName}}')
-    .replace(/\{\{\s*patientName\s*\}\}/g, ctx.patientName || '{{patientName}}')
-    .replace(/\{\{\s*mrn\s*\}\}/g, ctx.mrn || '{{mrn}}')
-    .replace(/\{\{\s*reportSnippet\s*\}\}/g, ctx.snippet || '')
-    .replace(/\{\{\s*findingDescription\s*\}\}/g, ctx.finding || '')
-    .replace(/\{\{\s*recommendation\s*\}\}/g, ctx.recommendation || '');
+    .replace(/\{\{\s*orgName\s*\}\}/g, ctx.orgName || "")
+    .replace(/\{\{\s*specialist\s*\}\}/g, ctx.specialist || "")
+    .replace(/\{\{\s*pcpName\s*\}\}/g, ctx.pcpName || "{{pcpName}}")
+    .replace(/\{\{\s*patientName\s*\}\}/g, ctx.patientName || "{{patientName}}")
+    .replace(/\{\{\s*patientDOB\s*\}\}/g, ctx.patientDOB || "{{patientDOB}}")
+    .replace(/\{\{\s*patientMRN\s*\}\}/g, ctx.patientMRN || "{{patientMRN}}")
+    .replace(/\{\{\s*reportSnippet\s*\}\}/g, ctx.snippet || "")
+    .replace(/\{\{\s*findingDescription\s*\}\}/g, ctx.finding || "")
+    .replace(/\{\{\s*recommendation\s*\}\}/g, ctx.recommendation || "");
 }
 
 async function loadOrgs() {
+  if (!orgSelect) return;
   orgSelect.innerHTML = `<option>Loading…</option>`;
   try {
-    const r = await fetch(`${API_BASE}/orgs`, { cache: 'no-store' });
+    const r = await fetch(`${API_BASE}/orgs`, { cache: "no-store" });
     const j = await r.json();
     const orgs = j.orgs || [];
-    orgSelect.innerHTML = `<option value="">Select org…</option>` +
-      orgs.map(o => `<option value="${encodeURIComponent(o.OrgName)}">${escapeHtml(o.OrgName)}</option>`).join('');
-  } catch (e) {
+    orgSelect.innerHTML =
+      `<option value="">Select org…</option>` +
+      orgs
+        .map(
+          (o) =>
+            `<option value="${encodeURIComponent(o.OrgName)}">${o.OrgName}</option>`
+        )
+        .join("");
+  } catch {
     orgSelect.innerHTML = `<option>Error loading orgs</option>`;
   }
 }
 
-// ---------- Modal (robust) ----------
-function renderQuestions(questions) {
-  qaForm.innerHTML = '';
-  for (const q of questions) {
-    const id = q.id;
-    const label = q.label || id;
-    const type = (q.type || 'text').toLowerCase();
+function renderSuggestion(j, { orgName, snippet }) {
+  // ---- left card: rule + confidence + guideline
+  const rule = j.chosenRule || {};
+  const sev  = String(rule.Severity || "").toLowerCase();
+  const badge =
+    sev
+      ? `<span class="badge ${sev}">${rule.Severity}</span>`
+      : "";
 
-    const wrap = document.createElement('div');
-    wrap.className = 'qa-field';
+  // confidence + guideline lines
+  const conf   = j.confidence || {};
+  const confPct =
+    typeof conf.score === "number"
+      ? `${Math.round(Math.max(0, Math.min(1, conf.score)) * 100)}%`
+      : "";
+  const confLine =
+    confPct
+      ? `<div class="meta"><b>Confidence:</b> ${confPct}${conf.explanation ? ` — ${conf.explanation}` : ""}</div>`
+      : "";
 
-    const lab = document.createElement('label');
-    lab.htmlFor = `qa_${id}`;
-    lab.className = 'qa-label';
-    lab.textContent = label;
+  const guideLine =
+    j.guideline
+      ? `<div class="meta"><b>Guideline:</b> ${j.guideline}</div>`
+      : "";
 
-    let input;
-    if (type === 'boolean') {
-      input = document.createElement('select');
-      input.innerHTML = `<option value="">—</option><option value="true">Yes</option><option value="false">No</option>`;
-    } else if (type === 'number') {
-      input = document.createElement('input');
-      input.type = 'number';
-      input.placeholder = 'e.g., 123';
-    } else {
-      input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'e.g., "on statin", "CAD on problem list", "unknown"';
-    }
-    input.id = `qa_${id}`;
-    input.name = id;
-    input.className = 'qa-input';
+  const rationaleLine =
+    j.rationale
+      ? `<div class="meta"><b>Why:</b> ${j.rationale}</div>`
+      : "";
 
-    wrap.appendChild(lab);
-    wrap.appendChild(input);
-    qaForm.appendChild(wrap);
-  }
+  ruleOut.innerHTML = `
+    <div><b>${rule.Finding || "(unknown rule)"}</b> ${badge}</div>
+    <div style="margin-top:6px"><i>Condition:</i> ${rule.Condition || "—"}</div>
+    <div style="margin-top:6px"><i>Recommendation:</i> ${rule.Recommendation || "—"}</div>
+    <div style="margin-top:10px">${confLine}${guideLine}${rationaleLine}</div>
+  `;
+
+  // ---- right card: routing + composed message
+  const routing = j.routing || {};
+  const message = j.message || {};
+  commsMeta.textContent = `${routing.channel || "?"} → ${routing.recipient || "?"}${
+    routing.templateName ? ` | ${routing.templateName}` : ""
+  }`;
+
+  const ctx = {
+    orgName,
+    specialist: routing.specialist || "",
+    snippet,
+    finding: rule.Finding || "",
+    recommendation: rule.Recommendation || "",
+  };
+  const subj = fillFields(message.subject || "", ctx);
+  const body = fillFields(message.body || "", ctx);
+  composerOut.value = (subj ? `Subject: ${subj}\n\n` : "") + body;
+
+  // download + mailto
+  const blob = new Blob([composerOut.value], { type: "text/plain" });
+  downloadTxt.href = URL.createObjectURL(blob);
+  const mSubject = encodeURIComponent(subj || "Incidental finding");
+  const mBody = encodeURIComponent(composerOut.value);
+  mailtoBtn.href = `mailto:?subject=${mSubject}&body=${mBody}`;
 }
-function collectAnswers() {
-  const ans = {};
-  qaForm.querySelectorAll('input, select, textarea').forEach(el => {
-    let v = el.value;
-    if (v === '') return;
-    if (v === 'true')  v = true;
-    if (v === 'false') v = false;
-    ans[el.name] = v;
+
+async function callSuggest({ orgName, pcp, snippet, answers }) {
+  const r = await fetch(`${API_BASE}/suggest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      orgName,
+      pcpOnRecord: pcp,
+      snippet,
+      ...(answers ? { answers } : {}),
+    }),
   });
-  return ans;
-}
-function openModal(questions) {
-  renderQuestions(questions);
-  show(qaModal);
-  // focus first input safely
-  setTimeout(() => {
-    const first = qaForm.querySelector('input,select,textarea');
-    first?.focus();
-  }, 0);
-}
-function closeModal() {
-  hide(qaModal);
+  return r.json();
 }
 
-qaForm?.addEventListener('submit', (e) => {
-  e.preventDefault();
-});
-qaCancel?.addEventListener('click', (e) => {
-  e.preventDefault();
-  closeModal();
-});
-modalX?.addEventListener('click', (e) => { e.preventDefault(); closeModal(); });
-modalBg?.addEventListener('click', (e) => { e.preventDefault(); closeModal(); });
+// ---------- events ----------
+reloadBtn?.addEventListener("click", loadOrgs);
 
-// Promise wrapper so caller can await answers
-function showQAModalAndCollect(questions) {
-  openModal(questions);
-  return new Promise((resolve) => {
-    const onSubmit = (ev) => {
-      ev.preventDefault();
-      const answers = collectAnswers();
-      qaSubmit.removeEventListener('click', onSubmit);
-      qaForm.removeEventListener('submit', onSubmit);
-      qaCancel.removeEventListener('click', onCancel);
-      closeModal();
-      resolve(answers);
-    };
-    const onCancel = (ev) => {
-      ev.preventDefault();
-      qaSubmit.removeEventListener('click', onSubmit);
-      qaForm.removeEventListener('submit', onSubmit);
-      qaCancel.removeEventListener('click', onCancel);
-      closeModal();
-      resolve({}); // empty → Worker proceeds without cues
-    };
-    qaSubmit.addEventListener('click', onSubmit);
-    qaForm.addEventListener('submit', onSubmit);
-    qaCancel.addEventListener('click', onCancel);
-  });
-}
-
-// ---------- Suggest Flow ----------
-async function suggestFlow() {
-  const orgName = decodeURIComponent(orgSelect.value || '');
-  const snippet  = (snippetEl.value || '').trim();
-  const pcp      = !!pcpOnRecord.checked;
+suggestBtn?.addEventListener("click", async () => {
+  const orgName = decodeURIComponent(orgSelect?.value || "");
+  const snippet = (snippetEl?.value || "").trim();
+  const pcp     = !!pcpOnRecord?.checked;
 
   if (!orgName || !snippet) {
-    alert('Select an organization and paste a report snippet.');
+    alert("Select an organization and paste a report snippet.");
     return;
   }
 
-  commsMeta.textContent = 'Thinking with OpenAI…';
-  composerOut.value = '';
-  ruleOut.innerHTML = '—';
+  commsMeta.textContent = "Thinking with OpenAI…";
+  composerOut.value = "";
+  ruleOut.innerHTML = "—";
 
   try {
-    let payload = { orgName, pcpOnRecord: pcp, snippet };
-
-    // first call: may request questions
-    let r = await fetch(`${API_BASE}/suggest`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    let j = await r.json();
+    // 1st call
+    const j = await callSuggest({ orgName, pcp, snippet });
     if (j.error) throw new Error(j.error);
 
-    if (j.needsQuestions && Array.isArray(j.questions)) {
-      const answers = await showQAModalAndCollect(j.questions);
-      payload = { ...payload, answers };
-      r = await fetch(`${API_BASE}/suggest`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      j = await r.json();
-      if (j.error) throw new Error(j.error);
+    // If the backend wants questions, show modal, then re-call with answers
+    if (j.needsQuestions && Array.isArray(j.questions) && j.questions.length) {
+      // build form
+      qaForm.innerHTML = j.questions
+        .map((q) => {
+          const id = `q_${q.id}`;
+          const ph =
+            q.placeholder ||
+            (q.type === "text"
+              ? `e.g., "on statin", "CAD on problem list"`
+              : "");
+          if (q.type === "boolean") {
+            return `
+              <label class="form-row">
+                <span>${q.label}</span>
+                <input type="checkbox" id="${id}" />
+              </label>`;
+          }
+          if (q.type === "number") {
+            return `
+              <label class="form-row">
+                <span>${q.label}</span>
+                <input type="number" id="${id}" />
+              </label>`;
+          }
+          // default text
+          return `
+            <label class="form-row">
+              <span>${q.label}</span>
+              <input type="text" id="${id}" placeholder="${ph}" />
+            </label>`;
+        })
+        .join("");
+
+      showModal();
+
+      // hook submit (one-shot)
+      const onSubmit = async (e) => {
+        e.preventDefault();
+        // collect answers
+        const answers = {};
+        for (const q of j.questions) {
+          const el = document.getElementById(`q_${q.id}`);
+          if (!el) continue;
+          if (q.type === "boolean") {
+            answers[q.id] = !!el.checked;
+          } else if (q.type === "number") {
+            const num = Number(el.value);
+            answers[q.id] = Number.isFinite(num) ? num : undefined;
+          } else {
+            answers[q.id] = el.value || "";
+          }
+        }
+
+        hideModal();
+
+        // second call with answers
+        commsMeta.textContent = "Applying chart-review cues…";
+        const j2 = await callSuggest({ orgName, pcp, snippet, answers });
+        if (j2.error) throw new Error(j2.error);
+
+        renderSuggestion(j2, { orgName, snippet });
+        // clean handler
+        qaForm.removeEventListener("submit", onSubmit);
+      };
+
+      qaForm.addEventListener("submit", onSubmit, { once: true });
+
+      // Cancel just closes and does nothing
+      qaCancel?.addEventListener(
+        "click",
+        () => {
+          hideModal();
+          // If you want to continue without answers, render the first response:
+          renderSuggestion(j, { orgName, snippet });
+        },
+        { once: true }
+      );
+
+      return; // stop here; render happens after modal submit/cancel
     }
 
-    const rule = j.chosenRule || {};
-    const routing = j.routing || {};
-    const message = j.message || {};
-
-    ruleOut.innerHTML = `
-      <div><b>${escapeHtml(rule.Finding || '(unknown rule)')}</b>
-        ${rule.Severity ? `<span class="badge ${String(rule.Severity).toLowerCase()}">${escapeHtml(rule.Severity)}</span>` : ''}
-      </div>
-      <div style="margin-top:6px"><i>Condition:</i> ${escapeHtml(rule.Condition || '—')}</div>
-      <div style="margin-top:6px"><i>Recommendation:</i> ${escapeHtml(rule.Recommendation || '—')}</div>
-    `;
-
-    commsMeta.textContent =
-      `${routing.channel || '?'} → ${routing.recipient || '?'} ${routing.templateName ? `| ${routing.templateName}` : ''}`;
-
-    const ctx = {
-      orgName,
-      specialist: routing.specialist || '',
-      snippet,
-      finding: rule.Finding || '',
-      recommendation: rule.Recommendation || ''
-    };
-    const subject = fillFields(message.subject || '', ctx);
-    const body    = fillFields(message.body || '', ctx);
-    composerOut.value = (subject ? `Subject: ${subject}\n\n` : '') + body;
-
-    // helpers
-    const blob = new Blob([composerOut.value], { type: 'text/plain' });
-    downloadTxt.href = URL.createObjectURL(blob);
-    const mSubject = encodeURIComponent(subject || 'Incidental finding');
-    const mBody    = encodeURIComponent(composerOut.value);
-    mailtoBtn.href = `mailto:?subject=${mSubject}&body=${mBody}`;
-
+    // no questions needed — render straight away
+    renderSuggestion(j, { orgName, snippet });
   } catch (e) {
     commsMeta.textContent = `Error: ${e.message}`;
   }
-}
+});
 
-// Wire-up
-reloadBtn?.addEventListener('click', (e) => { e.preventDefault(); loadOrgs(); });
-suggestBtn?.addEventListener('click', (e) => { e.preventDefault(); suggestFlow(); });
-copyBtn?.addEventListener('click', async (e) => { e.preventDefault(); try { await navigator.clipboard.writeText(composerOut.value || ''); } catch {} });
+// copy button
+copyBtn?.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(composerOut.value || "");
+  } catch {}
+});
 
+// close modal when backdrop or X is clicked
+qaModal?.addEventListener("click", (e) => {
+  if (e.target?.dataset?.modalClose !== undefined || e.target === qaModal.querySelector(".modal__backdrop")) {
+    hideModal();
+  }
+});
+
+// boot
 loadOrgs();
