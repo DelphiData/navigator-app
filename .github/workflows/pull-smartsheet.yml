@@ -101,7 +101,7 @@ jobs:
             const rulesSheet = await fetchSheet(SHEET_RULES_ID);
             const rules = flattenRows(rulesSheet).map(r => ({
               RuleID: r.RuleID || '',
-              Finding: r.Column2 || '',
+              Finding: r.Finding || '',
               Severity: r.Severity || '',
               Condition: r.Condition || '',
               Recommendation: r.Recommendation || '',
