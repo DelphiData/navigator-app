@@ -76,16 +76,29 @@ jobs:
               });
             }
 
-            // 1) Navigator Orgs
+            // 1) Navigator Orgs --- UPDATED LOGIC TO HANDLE NEW SPECIALIST COLUMNS ---
             const orgsSheet = await fetchSheet(SHEET_ORGS_ID);
-            const orgs = flattenRows(orgsSheet).map(r => ({
-              OrgName: r.OrgName || '',
-              AllowsFax: Boolean(r.Allows || r['Allows Fax'] || r['Allows Faxing']),
-              FaxNumber: r.FaxNumber || '',
-              SpecialistsAvailable: String(r.SpecialistsAvailable || '')
-                .split(/,\s*/)
-                .filter(Boolean)
-            }));
+            const orgs = flattenRows(orgsSheet).map(r => {
+              const specialists = [];
+              // Loop through up to 10 possible specialist columns to be safe
+              for (let i = 1; i <= 10; i++) {
+                const nameKey = `specialistName${i}`;
+                const contactKey = `specialistContact${i}`;
+                if (r[nameKey] && String(r[nameKey]).trim()) {
+                  specialists.push({
+                    name: r[nameKey].trim(),
+                    contact: r[contactKey] || ''
+                  });
+                }
+              }
+
+              return {
+                OrgName: r.OrgName || '',
+                AllowsFax: Boolean(r.Allows || r['Allows Fax'] || r['Allows Faxing']),
+                FaxNumber: r.FaxNumber || '',
+                Specialists: specialists // This creates the clean array for worker.js
+              };
+            });
 
             // 2) Comms Templates
             const commsSheet = await fetchSheet(SHEET_COMMS_ID);
@@ -105,7 +118,7 @@ jobs:
               Severity: r.Severity || '',
               Condition: r.Condition || '',
               Recommendation: r.Recommendation || '',
-              Logic: r.Logic || ''   // <-- NEW: carry the Logic JSON (string) from Smartsheet
+              Logic: r.Logic || ''
             }));
 
             // -------- Simple organ + specialty helpers (deterministic) --------
@@ -202,13 +215,12 @@ jobs:
                 Severity: r.Severity,
                 Condition: r.Condition,
                 Recommendation: r.Recommendation,
-                // enrichment fields expected by your Worker/frontend:
-                organ,                          // <-- NEW default organ
-                aliases: [],                    // <-- safe default (can be enriched later)
-                negatives: [],                  // <-- safe default (can be enriched later)
-                specialty,                      // <-- as before (AI or deterministic)
-                keywords,                       // <-- as before (AI or fallback)
-                Logic: r.Logic || ''            // <-- NEW pass-through of Smartsheet Logic JSON (string)
+                organ,
+                aliases: [],
+                negatives: [],
+                specialty,
+                keywords,
+                Logic: r.Logic || ''
               };
             });
 
