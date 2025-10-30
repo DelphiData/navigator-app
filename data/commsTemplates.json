@@ -1,37 +1,16 @@
 [
   {
-    "TemplateName": "PCP In-Basket Notification",
-    "Channel": "In-Basket",
+    "TemplateName": "Provider Letter - General Follow-up",
+    "Channel": "Letter / Fax",
     "Recipient": "PCP",
-    "Subject": "Incidental Finding for patient {{patientName}} (MRN: {{patientMRN}})",
-    "Body": "Dear Dr. {{pcpName}},\n\nThis is a notification from the incidental findings navigation program regarding your patient, {{patientName}} (MRN: {{patientMRN}}, DOB: {{patientDOB}}).\n\nA recent imaging study ({{studyType}} on {{studyDate}}) revealed the following incidental finding:\nFinding: {{findingDescription}}\n\nThe radiologist's report stated: \"{{reportSnippet}}\"\n\nBased on established guidelines, the recommended next step is: {{recommendation}}\n\nPlease review and place orders as appropriate. This case is being tracked by our navigation program.\n\nThank you,\n{{navigatorName}}\nIncidental Findings Navigator"
+    "Subject": "Incidental Finding Noted for {{patient_name}} (MRN: {{MRN}})",
+    "Body": "{{current_date}}\n\nDear Dr. {{primary_care_provider}},\n\nThis letter is regarding an incidental finding noted for your patient, {{patient_name}} (DOB: {{date_of_birth}}), on their recent {{study_name}} performed on {{exam_date}}.\n\nThe finding requires follow-up action. The official recommendation is:\n**{{recommendation}}**\n\nFor your convenience, the relevant snippet from the radiology report is included below:\n\"{{reportSnippet}}\"\n\nPlease review the full report in the patient's chart and take the appropriate next steps. Our team can assist with scheduling or coordination if needed.\n\nThank you,\n\nThe Navigator Team"
   },
   {
-    "TemplateName": "Provider Fax Cover Sheet",
-    "Channel": "Fax",
+    "TemplateName": "Provider Letter - Specialist Referral",
+    "Channel": "Letter / Fax",
     "Recipient": "PCP",
-    "Subject": "IMPORTANT: Incidental Finding Follow-up for {{patientName}}",
-    "Body": "*** CONFIDENTIAL HEALTH INFORMATION ***\n\nTO: Dr. {{pcpName}} / Ordering Provider\nFROM: {{navigatorName}}, Incidental Findings Navigation Program\nDATE: {{currentDate}}\nRE: Important Follow-up for Patient: {{patientName}} (MRN: {{patientMRN}})\n\nDear Provider,\n\nA recent imaging report for your patient contained an incidental finding requiring follow-up.\n\nFinding: {{findingDescription}}\nFrom Study: {{studyType}} on {{studyDate}}\nReport Snippet: \"{{reportSnippet}}\"\n\nRecommendation: {{recommendation}}\n\nPlease take the appropriate steps to manage this finding. We will be tracking this to ensure follow-up is completed.\n\nIf you have any questions, please contact our program at {{navigatorContact}}."
-  },
-  {
-    "TemplateName": "Patient Letter - High Urgency",
-    "Channel": "Letter",
-    "Recipient": "Patient",
-    "Subject": "Important Information About Your Recent Medical Imaging Test",
-    "Body": "{{currentDate}}\n\n{{patientName}}\n{{patientAddress}}\n\nDear {{patientName}},\n\nOur records show you had a recent imaging test ({{studyType}} on {{studyDate}}). The results included a finding that requires prompt follow-up with your doctor.\n\nIt is very important that you contact your primary care provider, Dr. {{pcpName}}, as soon as possible to discuss the results and arrange the necessary next steps.\n\nIf you do not have a primary care provider, please contact our office at {{navigatorContact}} immediately, and we will assist you.\n\nSincerely,\nThe {{orgName}} Care Team"
-  },
-  {
-    "TemplateName": "Ordering Provider Fax (No PCP)",
-    "Channel": "Fax",
-    "Recipient": "Ordering Provider",
-    "Subject": "ACTION REQUIRED: Incidental Finding for {{patientName}} (No PCP Listed)",
-    "Body": "*** CONFIDENTIAL HEALTH INFORMATION ***\n\nTO: Ordering Provider's Office\nFROM: {{navigatorName}}, Incidental Findings Navigation Program\nDATE: {{currentDate}}\nRE: Action Required for Patient: {{patientName}} (MRN: {{patientMRN}})\n\nDear Provider,\n\nA recent imaging study you ordered ({{studyType}} on {{studyDate}}) for {{patientName}} revealed an incidental finding requiring management.\n\nNo Primary Care Provider is listed for this patient in our records. As the ordering provider, we are notifying you to ensure continuity of care.\n\nFinding: {{findingDescription}}\nRecommendation: {{recommendation}}\n\nPlease take the necessary steps to manage this finding or refer the patient appropriately.\n\nThank you,\n{{navigatorName}}"
-  },
-  {
-    "TemplateName": "Call Specialist for Referral",
-    "Channel": "Phone",
-    "Recipient": "Specialist",
-    "Subject": "Patient Referral",
-    "Body": "Sample Script"
+    "Subject": "Incidental Finding Requiring Specialist Consultation for {{patient_name}} (MRN: {{MRN}})",
+    "Body": "{{current_date}}\n\nDear Dr. {{primary_care_provider}},\n\nThis letter is regarding an incidental finding noted for your patient, {{patient_name}} (DOB: {{date_of_birth}}), on their recent {{study_name}} performed on {{exam_date}}.\n\nThe finding warrants specialist consultation. The specific recommendation is:\n**{{recommendation}}**\n\n{{specialist_referral_details}}\n\nThe relevant snippet from the radiology report is included below:\n\"{{reportSnippet}}\"\n\nPlease review the full report and facilitate the referral. Our team is available to assist with coordination.\n\nThank you,\n\nThe Navigator Team"
   }
 ]
