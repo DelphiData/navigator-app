@@ -24,6 +24,14 @@
     "Logic": ""
   },
   {
+    "RuleID": "AD-B-Managed",
+    "Finding": "Adrenal incidentaloma",
+    "Severity": "Blue",
+    "Condition": "Adrenal mass already characterized or under endocrinology surveillance/management.",
+    "Recommendation": "Continue established endocrinology follow-up/surveillance; no new workup unless clinical change.",
+    "Logic": ""
+  },
+  {
     "RuleID": "AN-G-01",
     "Finding": "Aneurysm (AAA/TAA)",
     "Severity": "Green",
@@ -45,6 +53,14 @@
     "Severity": "Red",
     "Condition": "AAA >= 5.5cm, TAA >= 6.0cm, or rapid growth (>0.5cm/yr).",
     "Recommendation": "Urgent referral to vascular surgery for repair evaluation.",
+    "Logic": ""
+  },
+  {
+    "RuleID": "AN-B-Managed",
+    "Finding": "Aneurysm (AAA/TAA)",
+    "Severity": "Blue",
+    "Condition": "AAA/TAA documented and under vascular program or post-EVAR/TEVAR surveillance.",
+    "Recommendation": "Continue vascular surgery surveillance per program interval; coordinate with vascular team.",
     "Logic": ""
   },
   {
@@ -72,6 +88,14 @@
     "Logic": "{\n  \"name\": \"Managed IBD cue\",\n  \"inputs\": [\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"IBD meds? (e.g., mesalamine, azathioprine, biologic: infliximab/adalimumab)\" },\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known IBD or GI follow-up? (e.g., Crohn’s/UC clinic, GI on file)\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(crohn|ulcerative colitis|ibd)/i.test(history) || /(infliximab|adalimumab|mesalamine|azathioprine|vedolizumab|ustekinumab)/i.test(meds)\",\n      \"useRuleId\": \"BW-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known IBD under GI management; continue plan with gastroenterology.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Gastroenterology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
+    "RuleID": "BW-B-Managed",
+    "Finding": "Bowel Wall Thickening",
+    "Severity": "Blue",
+    "Condition": "Inflammatory bowel disease (Crohnâ€™s/UC) documented and under GI management.",
+    "Recommendation": "Continue gastroenterology management plan; no separate incidental pathway action.",
+    "Logic": ""
+  },
+  {
     "RuleID": "CV-G-01",
     "Finding": "CAC / Valvular",
     "Severity": "Green",
@@ -89,7 +113,7 @@
   },
   {
     "RuleID": "CV-B-Managed",
-    "Finding": "CAC/Valvular — Known/Managed",
+    "Finding": "CAC / Valvular",
     "Severity": "Blue",
     "Condition": "Incidental CAC with known CAD or already under management",
     "Recommendation": "Manage under CAD/secondary prevention pathway or verify statin intensity/adherence with PCP.",
@@ -129,7 +153,7 @@
   },
   {
     "RuleID": "EM-B-Managed",
-    "Finding": "Emphysema/COPD-Known/Managed",
+    "Finding": "Emphysema/COPD",
     "Severity": "Blue",
     "Condition": "On patients known problem list or being managed by pulmonologist.",
     "Recommendation": "Manage under COPD/exacerbation prevention pathway or verify medication adherence with PCP.",
@@ -160,6 +184,14 @@
     "Logic": ""
   },
   {
+    "RuleID": "GB-B-Managed",
+    "Finding": "Gallbladder/Biliary",
+    "Severity": "Blue",
+    "Condition": "Known gallbladder/biliary disease already worked up or scheduled with GI/surgery.",
+    "Recommendation": "Continue GI/surgical plan; no additional navigator action unless plan lapses.",
+    "Logic": ""
+  },
+  {
     "RuleID": "BR-G-01",
     "Finding": "Incidental Breast",
     "Severity": "Green",
@@ -181,6 +213,14 @@
     "Severity": "Red",
     "Condition": "BI-RADS 5. Highly suggestive of malignancy.",
     "Recommendation": "Urgent referral for biopsy and surgical consultation.",
+    "Logic": ""
+  },
+  {
+    "RuleID": "BR-B-Managed",
+    "Finding": "Incidental Breast",
+    "Severity": "Blue",
+    "Condition": "Breast finding enrolled in breast imaging/surgery pathway (surveillance/biopsy scheduled).",
+    "Recommendation": "Continue breast program plan; follow scheduled imaging/procedures.",
     "Logic": ""
   },
   {
@@ -208,6 +248,14 @@
     "Logic": ""
   },
   {
+    "RuleID": "PN-B-Managed",
+    "Finding": "Incidental PN (IPN)",
+    "Severity": "Blue",
+    "Condition": "Pulmonary nodule in active surveillance (pulmonology or lung nodule clinic).",
+    "Recommendation": "Continue nodule surveillance per existing interval; no duplicate orders.",
+    "Logic": ""
+  },
+  {
     "RuleID": "IL-G-01",
     "Finding": "Interstitial Lung (ILA)",
     "Severity": "Green",
@@ -232,6 +280,14 @@
     "Logic": "{\n  \"name\": \"Managed ILD cue\",\n  \"inputs\": [\n    { \"id\": \"history\", \"type\": \"text\", \"label\": \"Known ILD/ILD clinic? Prior HRCT, rheum overlap, or pulmonology care?\" },\n    { \"id\": \"meds\", \"type\": \"text\", \"label\": \"Antifibrotics/steroids? (e.g., nintedanib, pirfenidone)\" }\n  ],\n  \"evaluate\": [\n    {\n      \"when\": \"/(ild (clinic|program)|pulmonology|rheumatology)/i.test(history) || /(nintedanib|pirfenidone|prednisone)/i.test(meds)\",\n      \"useRuleId\": \"IL-B-Managed\",\n      \"setSeverity\": \"Blue\",\n      \"setRecommendation\": \"Known ILD under specialty care; continue current management and scheduled imaging.\",\n      \"route\": { \"recipient\": \"Specialist\", \"specialist\": \"Pulmonology\", \"channel\": \"In-Basket\" }\n    }\n  ]\n}"
   },
   {
+    "RuleID": "IL-B-Managed",
+    "Finding": "Interstitial Lung (ILA)",
+    "Severity": "Blue",
+    "Condition": "Known ILD/ILA followed by pulmonology/ILD clinic with established imaging plan.",
+    "Recommendation": "Continue ILD pathway and imaging cadence with pulmonology.",
+    "Logic": ""
+  },
+  {
     "RuleID": "LV-G-01",
     "Finding": "Liver lesion",
     "Severity": "Green",
@@ -253,6 +309,14 @@
     "Severity": "Red",
     "Condition": "LI-RADS 5, or new/growing lesion in cirrhosis.",
     "Recommendation": "Urgent referral to hepatology/oncology for management of likely hepatocellular carcinoma.",
+    "Logic": ""
+  },
+  {
+    "RuleID": "LV-B-Managed",
+    "Finding": "Liver lesion",
+    "Severity": "Blue",
+    "Condition": "Benign liver lesion (e.g., hemangioma/simple cyst) previously characterized and under surveillance if indicated.",
+    "Recommendation": "Continue hepatology/GI plan; no new workup unless interval change.",
     "Logic": ""
   },
   {
@@ -280,6 +344,14 @@
     "Logic": ""
   },
   {
+    "RuleID": "LR-B-Managed",
+    "Finding": "Lung-RADS (LDCT)",
+    "Severity": "Blue",
+    "Condition": "Patient enrolled in lung cancer screening program with scheduled LDCT interval.",
+    "Recommendation": "Continue screening program interval; coordinate with program as needed.",
+    "Logic": ""
+  },
+  {
     "RuleID": "LY-G-01",
     "Finding": "Lymphadenopathy",
     "Severity": "Green",
@@ -301,6 +373,14 @@
     "Severity": "Red",
     "Condition": "Nodes with necrotic center, or >1.5cm short axis.",
     "Recommendation": "Suspicious for malignancy or infection. Recommend biopsy and appropriate clinical referral.",
+    "Logic": ""
+  },
+  {
+    "RuleID": "LY-B-Managed",
+    "Finding": "Lymphadenopathy",
+    "Severity": "Blue",
+    "Condition": "Nodes previously characterized/reactive or under oncology/ID/rheumatology follow-up.",
+    "Recommendation": "Continue specialist/PCP plan; repeat workup only if clinical change.",
     "Logic": ""
   },
   {
@@ -328,6 +408,14 @@
     "Logic": ""
   },
   {
+    "RuleID": "OV-B-Managed",
+    "Finding": "Ovarian Mass",
+    "Severity": "Blue",
+    "Condition": "Adnexal finding under gynecology/gynecologic oncology pathway with imaging or surgery plan.",
+    "Recommendation": "Continue Gyn/Gyn-Onc plan; follow scheduled imaging/procedures.",
+    "Logic": ""
+  },
+  {
     "RuleID": "PA-G-01",
     "Finding": "Pancreatic cyst/mass",
     "Severity": "Green",
@@ -349,6 +437,14 @@
     "Severity": "Red",
     "Condition": "Solid mass, or cyst >= 3cm with worrisome features (mural nodule, dilated duct).",
     "Recommendation": "Urgent referral to gastroenterology/surgical oncology.",
+    "Logic": ""
+  },
+  {
+    "RuleID": "PA-B-Managed",
+    "Finding": "Pancreatic cyst/mass",
+    "Severity": "Blue",
+    "Condition": "Pancreatic cyst/IPMN under GI or surgical oncology surveillance (e.g., MRCP/EUS schedule).",
+    "Recommendation": "Continue established surveillance interval and specialty follow-up.",
     "Logic": ""
   },
   {
@@ -376,6 +472,14 @@
     "Logic": ""
   },
   {
+    "RuleID": "PR-B-Managed",
+    "Finding": "Prostate Finding",
+    "Severity": "Blue",
+    "Condition": "Prostate finding under urology active surveillance/biopsy pathway.",
+    "Recommendation": "Continue urology plan; no duplicative orders.",
+    "Logic": ""
+  },
+  {
     "RuleID": "RN-G-01",
     "Finding": "Renal mass",
     "Severity": "Green",
@@ -397,6 +501,14 @@
     "Severity": "Red",
     "Condition": "Solid enhancing mass >4cm, or complex cystic (Bosniak IV).",
     "Recommendation": "Urgent referral to urology for surgical evaluation.",
+    "Logic": ""
+  },
+  {
+    "RuleID": "RN-B-Managed",
+    "Finding": "Renal mass",
+    "Severity": "Blue",
+    "Condition": "Renal lesion under urology management/surveillance or post-procedure follow-up.",
+    "Recommendation": "Continue urology pathway and scheduled imaging.",
     "Logic": ""
   },
   {
@@ -424,6 +536,14 @@
     "Logic": ""
   },
   {
+    "RuleID": "SP-B-Managed",
+    "Finding": "Splenic Lesion",
+    "Severity": "Blue",
+    "Condition": "Benign splenic lesion documented as stable or under specialty/PCP follow-up.",
+    "Recommendation": "Continue existing plan; no additional workup unless interval change.",
+    "Logic": ""
+  },
+  {
     "RuleID": "TH-G-01",
     "Finding": "Thyroid nodule",
     "Severity": "Green",
@@ -445,6 +565,14 @@
     "Severity": "Red",
     "Condition": "TI-RADS 5. Highly suspicious.",
     "Recommendation": "Recommend fine-needle aspiration (FNA) biopsy. Urgent referral to endocrinology.",
+    "Logic": ""
+  },
+  {
+    "RuleID": "TH-B-Managed",
+    "Finding": "Thyroid nodule",
+    "Severity": "Blue",
+    "Condition": "Thyroid nodule under endocrinology with TI-RADS/FNA pathway or surveillance cadence.",
+    "Recommendation": "Continue endocrine plan and scheduled ultrasound/FNA as indicated.",
     "Logic": ""
   },
   {
@@ -472,136 +600,8 @@
     "Logic": ""
   },
   {
-    "RuleID": "AD-B-Managed",
-    "Finding": "Adrenal incidentaloma - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Adrenal mass already characterized or under endocrinology surveillance/management.",
-    "Recommendation": "Continue established endocrinology follow-up/surveillance; no new workup unless clinical change.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "AN-B-Managed",
-    "Finding": "Aneurysm (AAA/TAA) - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "AAA/TAA documented and under vascular program or post-EVAR/TEVAR surveillance.",
-    "Recommendation": "Continue vascular surgery surveillance per program interval; coordinate with vascular team.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "BW-B-Managed",
-    "Finding": "Bowel Wall Thickening - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Inflammatory bowel disease (Crohnâ€™s/UC) documented and under GI management.",
-    "Recommendation": "Continue gastroenterology management plan; no separate incidental pathway action.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "GB-B-Managed",
-    "Finding": "Gallbladder/Biliary - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Known gallbladder/biliary disease already worked up or scheduled with GI/surgery.",
-    "Recommendation": "Continue GI/surgical plan; no additional navigator action unless plan lapses.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "BR-B-Managed",
-    "Finding": "Incidental Breast - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Breast finding enrolled in breast imaging/surgery pathway (surveillance/biopsy scheduled).",
-    "Recommendation": "Continue breast program plan; follow scheduled imaging/procedures.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "PN-B-Managed",
-    "Finding": "Incidental PN (IPN) - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Pulmonary nodule in active surveillance (pulmonology or lung nodule clinic).",
-    "Recommendation": "Continue nodule surveillance per existing interval; no duplicate orders.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "IL-B-Managed",
-    "Finding": "Interstitial Lung (ILA) - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Known ILD/ILA followed by pulmonology/ILD clinic with established imaging plan.",
-    "Recommendation": "Continue ILD pathway and imaging cadence with pulmonology.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "LV-B-Managed",
-    "Finding": "Liver lesion - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Benign liver lesion (e.g., hemangioma/simple cyst) previously characterized and under surveillance if indicated.",
-    "Recommendation": "Continue hepatology/GI plan; no new workup unless interval change.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "LR-B-Managed",
-    "Finding": "Lung-RADS (LDCT) - Program/Managed",
-    "Severity": "Blue",
-    "Condition": "Patient enrolled in lung cancer screening program with scheduled LDCT interval.",
-    "Recommendation": "Continue screening program interval; coordinate with program as needed.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "LY-B-Managed",
-    "Finding": "Lymphadenopathy - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Nodes previously characterized/reactive or under oncology/ID/rheumatology follow-up.",
-    "Recommendation": "Continue specialist/PCP plan; repeat workup only if clinical change.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "OV-B-Managed",
-    "Finding": "Ovarian Mass - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Adnexal finding under gynecology/gynecologic oncology pathway with imaging or surgery plan.",
-    "Recommendation": "Continue Gyn/Gyn-Onc plan; follow scheduled imaging/procedures.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "PA-B-Managed",
-    "Finding": "Pancreatic cyst/mass - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Pancreatic cyst/IPMN under GI or surgical oncology surveillance (e.g., MRCP/EUS schedule).",
-    "Recommendation": "Continue established surveillance interval and specialty follow-up.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "PR-B-Managed",
-    "Finding": "Prostate Finding - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Prostate finding under urology active surveillance/biopsy pathway.",
-    "Recommendation": "Continue urology plan; no duplicative orders.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "RN-B-Managed",
-    "Finding": "Renal mass - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Renal lesion under urology management/surveillance or post-procedure follow-up.",
-    "Recommendation": "Continue urology pathway and scheduled imaging.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "SP-B-Managed",
-    "Finding": "Splenic Lesion - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Benign splenic lesion documented as stable or under specialty/PCP follow-up.",
-    "Recommendation": "Continue existing plan; no additional workup unless interval change.",
-    "Logic": ""
-  },
-  {
-    "RuleID": "TH-B-Managed",
-    "Finding": "Thyroid nodule - Known/Managed",
-    "Severity": "Blue",
-    "Condition": "Thyroid nodule under endocrinology with TI-RADS/FNA pathway or surveillance cadence.",
-    "Recommendation": "Continue endocrine plan and scheduled ultrasound/FNA as indicated.",
-    "Logic": ""
-  },
-  {
     "RuleID": "VF-B-Managed",
-    "Finding": "Vertebral Fracture - Known/Managed",
+    "Finding": "Vertebral Fracture",
     "Severity": "Blue",
     "Condition": "Compression fracture/osteoporosis under endocrine/orthopedic management or osteoporosis clinic.",
     "Recommendation": "Continue specialist/PCP management (DEXA/therapy) per existing plan.",
