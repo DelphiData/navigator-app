@@ -232,7 +232,7 @@ suggestBtn?.addEventListener("click", async () => {
         qaForm.removeEventListener("submit", onSubmit);
       };
 
-      qaForm.addEventListener("submit", onSubmit, { once: true });
+      qaSubmit.addEventListener("click", onSubmit, { once: true });
 
       // Cancel just closes and does nothing
       qaCancel?.addEventListener(
