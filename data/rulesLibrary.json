@@ -1,7 +1,7 @@
 [
   {
     "RuleID": "AD-G-01",
-    "Finding": "",
+    "Finding": "Adrenal incidentaloma",
     "Severity": "Green",
     "Condition": "Mass <1cm or clear adenoma.",
     "Recommendation": "Annual imaging follow-up may be considered if clinically indicated. No urgent action required.",
@@ -9,7 +9,7 @@
   },
   {
     "RuleID": "AD-A-01",
-    "Finding": "",
+    "Finding": "Adrenal incidentaloma",
     "Severity": "Amber",
     "Condition": "Mass 1-4cm, indeterminate.",
     "Recommendation": "Recommend dedicated adrenal protocol CT or MRI for further characterization. Refer to endocrinology.",
@@ -17,7 +17,7 @@
   },
   {
     "RuleID": "AD-R-01",
-    "Finding": "",
+    "Finding": "Adrenal incidentaloma",
     "Severity": "Red",
     "Condition": "Mass >4cm, or suspicious features (e.g., >10 HU non-contrast).",
     "Recommendation": "Urgent referral to endocrinology and likely surgical consultation for suspected malignancy.",
@@ -25,7 +25,7 @@
   },
   {
     "RuleID": "AN-G-01",
-    "Finding": "",
+    "Finding": "Aneurysm (AAA/TAA)",
     "Severity": "Green",
     "Condition": "Aortic ectasia or small aneurysm (AAA 3.0-3.9cm).",
     "Recommendation": "Recommend annual ultrasound surveillance.",
@@ -33,7 +33,7 @@
   },
   {
     "RuleID": "AN-A-01",
-    "Finding": "",
+    "Finding": "Aneurysm (AAA/TAA)",
     "Severity": "Amber",
     "Condition": "AAA 4.0-5.4cm, TAA 4.5-5.9cm.",
     "Recommendation": "Recommend semi-annual ultrasound surveillance. Consider vascular surgery consultation.",
@@ -41,7 +41,7 @@
   },
   {
     "RuleID": "AN-R-01",
-    "Finding": "",
+    "Finding": "Aneurysm (AAA/TAA)",
     "Severity": "Red",
     "Condition": "AAA >= 5.5cm, TAA >= 6.0cm, or rapid growth (>0.5cm/yr).",
     "Recommendation": "Urgent referral to vascular surgery for repair evaluation.",
@@ -49,7 +49,7 @@
   },
   {
     "RuleID": "BW-G-01",
-    "Finding": "",
+    "Finding": "Bowel Wall Thickening",
     "Severity": "Green",
     "Condition": "Mild",
     "Recommendation": "likely reactive thickening. Clinically correlate. If asymptomatic no further action needed.",
@@ -57,7 +57,7 @@
   },
   {
     "RuleID": "BW-A-01",
-    "Finding": "",
+    "Finding": "Bowel Wall Thickening",
     "Severity": "Amber",
     "Condition": "Diffuse or segmental thickening (inflammatory).",
     "Recommendation": "Recommend clinical correlation for inflammatory bowel disease. Consider gastroenterology referral.",
@@ -65,7 +65,7 @@
   },
   {
     "RuleID": "BW-R-01",
-    "Finding": "",
+    "Finding": "Bowel Wall Thickening",
     "Severity": "Red",
     "Condition": "Focal",
     "Recommendation": "asymmetric thickening suggestive of malignancy. Recommend colonoscopy or dedicated CT enterography. Urgent gastroenterology referral.",
@@ -73,7 +73,7 @@
   },
   {
     "RuleID": "CV-G-01",
-    "Finding": "",
+    "Finding": "CAC / Valvular",
     "Severity": "Green",
     "Condition": "Mild CAC (1-99) or mild valve disease.",
     "Recommendation": "Inform patient and PCP. Recommend routine cardiovascular risk management.",
@@ -81,7 +81,7 @@
   },
   {
     "RuleID": "CV-A-01",
-    "Finding": "",
+    "Finding": "CAC / Valvular",
     "Severity": "Amber",
     "Condition": "Moderate CAC (100-400) or moderate valve disease.",
     "Recommendation": "Recommend cardiology consultation for risk stratification and management.",
@@ -89,7 +89,7 @@
   },
   {
     "RuleID": "CV-B-Managed",
-    "Finding": "",
+    "Finding": "CAC/Valvular — Known/Managed",
     "Severity": "Blue",
     "Condition": "Incidental CAC with known CAD or already under management",
     "Recommendation": "Manage under CAD/secondary prevention pathway or verify statin intensity/adherence with PCP.",
@@ -97,7 +97,7 @@
   },
   {
     "RuleID": "CV-R-01",
-    "Finding": "",
+    "Finding": "CAC / Valvular",
     "Severity": "Red",
     "Condition": "Severe CAC (>400 Agatston) or severe valve stenosis/regurg.",
     "Recommendation": "Urgent cardiology consultation.",
@@ -105,7 +105,7 @@
   },
   {
     "RuleID": "EM-G-01",
-    "Finding": "",
+    "Finding": "Emphysema/COPD",
     "Severity": "Green",
     "Condition": "Mild or trace emphysema.",
     "Recommendation": "Recommend smoking cessation counseling if applicable. Inform PCP.",
@@ -113,7 +113,7 @@
   },
   {
     "RuleID": "EM-A-01",
-    "Finding": "",
+    "Finding": "Emphysema/COPD",
     "Severity": "Amber",
     "Condition": "Moderate emphysema.",
     "Recommendation": "Recommend PCP follow-up for pulmonary function testing and management.",
@@ -121,7 +121,7 @@
   },
   {
     "RuleID": "EM-R-01",
-    "Finding": "",
+    "Finding": "Emphysema/COPD",
     "Severity": "Red",
     "Condition": "Severe emphysema with signs of exacerbation.",
     "Recommendation": "Recommend urgent PCP or pulmonology follow-up.",
@@ -129,7 +129,7 @@
   },
   {
     "RuleID": "EM-B-Managed",
-    "Finding": "",
+    "Finding": "Emphysema/COPD-Known/Managed",
     "Severity": "Blue",
     "Condition": "On patients known problem list or being managed by pulmonologist.",
     "Recommendation": "Manage under COPD/exacerbation prevention pathway or verify medication adherence with PCP.",
@@ -137,7 +137,7 @@
   },
   {
     "RuleID": "GB-G-01",
-    "Finding": "",
+    "Finding": "Gallbladder/Biliary",
     "Severity": "Green",
     "Condition": "Sludge or small polyps.",
     "Recommendation": "Typically incidental. No follow-up needed unless symptomatic.",
@@ -145,7 +145,7 @@
   },
   {
     "RuleID": "GB-A-01",
-    "Finding": "",
+    "Finding": "Gallbladder/Biliary",
     "Severity": "Amber",
     "Condition": "Polyps >1cm or moderate ductal dilation.",
     "Recommendation": "Recommend dedicated gallbladder ultrasound and surgical consultation.",
@@ -153,7 +153,7 @@
   },
   {
     "RuleID": "GB-R-01",
-    "Finding": "",
+    "Finding": "Gallbladder/Biliary",
     "Severity": "Red",
     "Condition": "Wall thickening >3mm, mass, or significant ductal dilation.",
     "Recommendation": "Urgent referral for surgical/gastroenterology evaluation for possible malignancy.",
@@ -161,7 +161,7 @@
   },
   {
     "RuleID": "BR-G-01",
-    "Finding": "",
+    "Finding": "Incidental Breast",
     "Severity": "Green",
     "Condition": "BI-RADS 3. Probably benign.",
     "Recommendation": "Recommend short-interval (6-month) follow-up mammogram.",
@@ -169,7 +169,7 @@
   },
   {
     "RuleID": "BR-A-01",
-    "Finding": "",
+    "Finding": "Incidental Breast",
     "Severity": "Amber",
     "Condition": "BI-RADS 4. Suspicious.",
     "Recommendation": "Recommend biopsy. Refer to breast surgery/radiology.",
@@ -177,7 +177,7 @@
   },
   {
     "RuleID": "BR-R-01",
-    "Finding": "",
+    "Finding": "Incidental Breast",
     "Severity": "Red",
     "Condition": "BI-RADS 5. Highly suggestive of malignancy.",
     "Recommendation": "Urgent referral for biopsy and surgical consultation.",
@@ -185,7 +185,7 @@
   },
   {
     "RuleID": "PN-G-01",
-    "Finding": "",
+    "Finding": "Incidental PN (IPN)",
     "Severity": "Green",
     "Condition": "<4mm solid, or stable nodule.",
     "Recommendation": "No routine follow-up recommended per Fleischner guidelines.",
@@ -193,7 +193,7 @@
   },
   {
     "RuleID": "PN-A-01",
-    "Finding": "",
+    "Finding": "Incidental PN (IPN)",
     "Severity": "Amber",
     "Condition": "4-8mm solid, or subsolid nodule.",
     "Recommendation": "Recommend follow-up low-dose CT at 3-6 months per Fleischner guidelines.",
@@ -201,7 +201,7 @@
   },
   {
     "RuleID": "PN-R-01",
-    "Finding": "",
+    "Finding": "Incidental PN (IPN)",
     "Severity": "Red",
     "Condition": ">= 8mm solid, new, or growing nodule.",
     "Recommendation": "Recommend PET-CT and/or biopsy. Refer to pulmonology.",
@@ -209,7 +209,7 @@
   },
   {
     "RuleID": "IL-G-01",
-    "Finding": "",
+    "Finding": "Interstitial Lung (ILA)",
     "Severity": "Green",
     "Condition": "Trace ILA.",
     "Recommendation": "Incidental finding. Inform PCP. No specific follow-up required.",
@@ -217,7 +217,7 @@
   },
   {
     "RuleID": "IL-A-01",
-    "Finding": "",
+    "Finding": "Interstitial Lung (ILA)",
     "Severity": "Amber",
     "Condition": "Non-fibrotic ILA involving >5% of lung zone.",
     "Recommendation": "Recommend pulmonology consultation for evaluation.",
@@ -225,7 +225,7 @@
   },
   {
     "RuleID": "IL-R-01",
-    "Finding": "",
+    "Finding": "Interstitial Lung (ILA)",
     "Severity": "Red",
     "Condition": "Fibrotic ILA with honeycombing.",
     "Recommendation": "Urgent referral to pulmonology for management of likely interstitial lung disease.",
@@ -233,7 +233,7 @@
   },
   {
     "RuleID": "LV-G-01",
-    "Finding": "",
+    "Finding": "Liver lesion",
     "Severity": "Green",
     "Condition": "Simple cyst or clear hemangioma.",
     "Recommendation": "Benign findings. No follow-up needed.",
@@ -241,7 +241,7 @@
   },
   {
     "RuleID": "LV-A-01",
-    "Finding": "",
+    "Finding": "Liver lesion",
     "Severity": "Amber",
     "Condition": "LI-RADS 4, or indeterminate lesion >1cm.",
     "Recommendation": "Recommend multiphasic MRI or CT for characterization. Consider gastroenterology/hepatology referral.",
@@ -249,7 +249,7 @@
   },
   {
     "RuleID": "LV-R-01",
-    "Finding": "",
+    "Finding": "Liver lesion",
     "Severity": "Red",
     "Condition": "LI-RADS 5, or new/growing lesion in cirrhosis.",
     "Recommendation": "Urgent referral to hepatology/oncology for management of likely hepatocellular carcinoma.",
@@ -257,7 +257,7 @@
   },
   {
     "RuleID": "LR-G-01",
-    "Finding": "",
+    "Finding": "Lung-RADS (LDCT)",
     "Severity": "Green",
     "Condition": "Lung-RADS 3. Probably benign.",
     "Recommendation": "Recommend follow-up low-dose CT in 6 months.",
@@ -265,7 +265,7 @@
   },
   {
     "RuleID": "LR-A-01",
-    "Finding": "",
+    "Finding": "Lung-RADS (LDCT)",
     "Severity": "Amber",
     "Condition": "Lung-RADS 4A. Suspicious.",
     "Recommendation": "Recommend follow-up low-dose CT in 3 months or PET/CT.",
@@ -273,7 +273,7 @@
   },
   {
     "RuleID": "LR-R-01",
-    "Finding": "",
+    "Finding": "Lung-RADS (LDCT)",
     "Severity": "Red",
     "Condition": "Lung-RADS 4B, 4X. Highly suspicious.",
     "Recommendation": "Recommend biopsy or further diagnostic workup. Urgent pulmonology referral.",
@@ -281,7 +281,7 @@
   },
   {
     "RuleID": "LY-G-01",
-    "Finding": "",
+    "Finding": "Lymphadenopathy",
     "Severity": "Green",
     "Condition": "Normal or reactive-appearing nodes.",
     "Recommendation": "Likely benign. No follow-up needed unless clinically indicated.",
@@ -289,7 +289,7 @@
   },
   {
     "RuleID": "LY-A-01",
-    "Finding": "",
+    "Finding": "Lymphadenopathy",
     "Severity": "Amber",
     "Condition": "Enlarged nodes 1-1.5cm short axis.",
     "Recommendation": "Recommend clinical correlation and consider follow-up imaging in 3 months.",
@@ -297,7 +297,7 @@
   },
   {
     "RuleID": "LY-R-01",
-    "Finding": "",
+    "Finding": "Lymphadenopathy",
     "Severity": "Red",
     "Condition": "Nodes with necrotic center, or >1.5cm short axis.",
     "Recommendation": "Suspicious for malignancy or infection. Recommend biopsy and appropriate clinical referral.",
@@ -305,7 +305,7 @@
   },
   {
     "RuleID": "OV-G-01",
-    "Finding": "",
+    "Finding": "Ovarian Mass",
     "Severity": "Green",
     "Condition": "Simple cyst or O-RADS 3.",
     "Recommendation": "Follow-up ultrasound may be recommended based on size and patient age.",
@@ -313,7 +313,7 @@
   },
   {
     "RuleID": "OV-A-01",
-    "Finding": "",
+    "Finding": "Ovarian Mass",
     "Severity": "Amber",
     "Condition": "O-RADS 4. Intermediate risk.",
     "Recommendation": "Recommend gynecologic consultation and likely MRI for further characterization.",
@@ -321,7 +321,7 @@
   },
   {
     "RuleID": "OV-R-01",
-    "Finding": "",
+    "Finding": "Ovarian Mass",
     "Severity": "Red",
     "Condition": "O-RADS 5. High risk of malignancy.",
     "Recommendation": "Urgent referral to gynecologic oncology.",
@@ -329,7 +329,7 @@
   },
   {
     "RuleID": "PA-G-01",
-    "Finding": "",
+    "Finding": "Pancreatic cyst/mass",
     "Severity": "Green",
     "Condition": "Simple cyst <1cm.",
     "Recommendation": "No follow-up required.",
@@ -337,7 +337,7 @@
   },
   {
     "RuleID": "PA-A-01",
-    "Finding": "",
+    "Finding": "Pancreatic cyst/mass",
     "Severity": "Amber",
     "Condition": "Cyst 1-3cm without worrisome features.",
     "Recommendation": "Recommend follow-up with MRCP in 6-12 months.",
@@ -345,7 +345,7 @@
   },
   {
     "RuleID": "PA-R-01",
-    "Finding": "",
+    "Finding": "Pancreatic cyst/mass",
     "Severity": "Red",
     "Condition": "Solid mass, or cyst >= 3cm with worrisome features (mural nodule, dilated duct).",
     "Recommendation": "Urgent referral to gastroenterology/surgical oncology.",
@@ -353,7 +353,7 @@
   },
   {
     "RuleID": "PR-G-01",
-    "Finding": "",
+    "Finding": "Prostate Finding",
     "Severity": "Green",
     "Condition": "BPH or PI-RADS 3.",
     "Recommendation": "Recommend routine PSA monitoring with PCP.",
@@ -361,7 +361,7 @@
   },
   {
     "RuleID": "PR-A-01",
-    "Finding": "",
+    "Finding": "Prostate Finding",
     "Severity": "Amber",
     "Condition": "PI-RADS 4.",
     "Recommendation": "Recommend urology consultation for consideration of biopsy.",
@@ -369,7 +369,7 @@
   },
   {
     "RuleID": "PR-R-01",
-    "Finding": "",
+    "Finding": "Prostate Finding",
     "Severity": "Red",
     "Condition": "PI-RADS 5 on MRI, or clear extra-prostatic extension.",
     "Recommendation": "Urgent referral to urology for biopsy and staging.",
@@ -377,7 +377,7 @@
   },
   {
     "RuleID": "RN-G-01",
-    "Finding": "",
+    "Finding": "Renal mass",
     "Severity": "Green",
     "Condition": "Simple cyst (Bosniak I/II) or small non-enhancing lesion.",
     "Recommendation": "Benign. No follow-up required.",
@@ -385,7 +385,7 @@
   },
   {
     "RuleID": "RN-A-01",
-    "Finding": "",
+    "Finding": "Renal mass",
     "Severity": "Amber",
     "Condition": "Solid enhancing mass 1-4cm, or Bosniak III cyst.",
     "Recommendation": "Recommend urology consultation for management which may include surveillance or treatment.",
@@ -393,7 +393,7 @@
   },
   {
     "RuleID": "RN-R-01",
-    "Finding": "",
+    "Finding": "Renal mass",
     "Severity": "Red",
     "Condition": "Solid enhancing mass >4cm, or complex cystic (Bosniak IV).",
     "Recommendation": "Urgent referral to urology for surgical evaluation.",
@@ -401,7 +401,7 @@
   },
   {
     "RuleID": "SP-G-01",
-    "Finding": "",
+    "Finding": "Splenic Lesion",
     "Severity": "Green",
     "Condition": "Simple cyst or hemangioma.",
     "Recommendation": "Benign. No follow-up required.",
@@ -409,7 +409,7 @@
   },
   {
     "RuleID": "SP-A-01",
-    "Finding": "",
+    "Finding": "Splenic Lesion",
     "Severity": "Amber",
     "Condition": "Indeterminate lesion >1cm.",
     "Recommendation": "Recommend follow-up imaging (e.g. MRI) for characterization.",
@@ -417,7 +417,7 @@
   },
   {
     "RuleID": "SP-R-01",
-    "Finding": "",
+    "Finding": "Splenic Lesion",
     "Severity": "Red",
     "Condition": "Growing or complex solid lesion.",
     "Recommendation": "Recommend surgical or hematology consultation.",
@@ -425,7 +425,7 @@
   },
   {
     "RuleID": "TH-G-01",
-    "Finding": "",
+    "Finding": "Thyroid nodule",
     "Severity": "Green",
     "Condition": "TI-RADS 3. Mildly suspicious.",
     "Recommendation": "Recommend follow-up ultrasound in 12 months.",
@@ -433,7 +433,7 @@
   },
   {
     "RuleID": "TH-A-01",
-    "Finding": "",
+    "Finding": "Thyroid nodule",
     "Severity": "Amber",
     "Condition": "TI-RADS 4. Suspicious.",
     "Recommendation": "Recommend fine-needle aspiration (FNA) biopsy. Refer to endocrinology.",
@@ -441,7 +441,7 @@
   },
   {
     "RuleID": "TH-R-01",
-    "Finding": "",
+    "Finding": "Thyroid nodule",
     "Severity": "Red",
     "Condition": "TI-RADS 5. Highly suspicious.",
     "Recommendation": "Recommend fine-needle aspiration (FNA) biopsy. Urgent referral to endocrinology.",
@@ -449,7 +449,7 @@
   },
   {
     "RuleID": "VF-G-01",
-    "Finding": "",
+    "Finding": "Vertebral Fracture",
     "Severity": "Green",
     "Condition": "Mild (<25%) height loss.",
     "Recommendation": "Recommend PCP follow-up for osteoporosis evaluation.",
@@ -457,7 +457,7 @@
   },
   {
     "RuleID": "VF-A-01",
-    "Finding": "",
+    "Finding": "Vertebral Fracture",
     "Severity": "Amber",
     "Condition": "Moderate (25-40%) height loss.",
     "Recommendation": "Recommend PCP follow-up for osteoporosis management and consider orthopedic consultation.",
@@ -465,7 +465,7 @@
   },
   {
     "RuleID": "VF-R-01",
-    "Finding": "",
+    "Finding": "Vertebral Fracture",
     "Severity": "Red",
     "Condition": "Severe (>40%) height loss, or suspected pathologic fracture.",
     "Recommendation": "Urgent orthopedic or spine surgery consultation to rule out instability or malignancy.",
@@ -473,7 +473,7 @@
   },
   {
     "RuleID": "AD-B-Managed",
-    "Finding": "",
+    "Finding": "Adrenal incidentaloma - Known/Managed",
     "Severity": "Blue",
     "Condition": "Adrenal mass already characterized or under endocrinology surveillance/management.",
     "Recommendation": "Continue established endocrinology follow-up/surveillance; no new workup unless clinical change.",
@@ -481,7 +481,7 @@
   },
   {
     "RuleID": "AN-B-Managed",
-    "Finding": "",
+    "Finding": "Aneurysm (AAA/TAA) - Known/Managed",
     "Severity": "Blue",
     "Condition": "AAA/TAA documented and under vascular program or post-EVAR/TEVAR surveillance.",
     "Recommendation": "Continue vascular surgery surveillance per program interval; coordinate with vascular team.",
@@ -489,7 +489,7 @@
   },
   {
     "RuleID": "BW-B-Managed",
-    "Finding": "",
+    "Finding": "Bowel Wall Thickening - Known/Managed",
     "Severity": "Blue",
     "Condition": "Inflammatory bowel disease (Crohnâ€™s/UC) documented and under GI management.",
     "Recommendation": "Continue gastroenterology management plan; no separate incidental pathway action.",
@@ -497,7 +497,7 @@
   },
   {
     "RuleID": "GB-B-Managed",
-    "Finding": "",
+    "Finding": "Gallbladder/Biliary - Known/Managed",
     "Severity": "Blue",
     "Condition": "Known gallbladder/biliary disease already worked up or scheduled with GI/surgery.",
     "Recommendation": "Continue GI/surgical plan; no additional navigator action unless plan lapses.",
@@ -505,7 +505,7 @@
   },
   {
     "RuleID": "BR-B-Managed",
-    "Finding": "",
+    "Finding": "Incidental Breast - Known/Managed",
     "Severity": "Blue",
     "Condition": "Breast finding enrolled in breast imaging/surgery pathway (surveillance/biopsy scheduled).",
     "Recommendation": "Continue breast program plan; follow scheduled imaging/procedures.",
@@ -513,7 +513,7 @@
   },
   {
     "RuleID": "PN-B-Managed",
-    "Finding": "",
+    "Finding": "Incidental PN (IPN) - Known/Managed",
     "Severity": "Blue",
     "Condition": "Pulmonary nodule in active surveillance (pulmonology or lung nodule clinic).",
     "Recommendation": "Continue nodule surveillance per existing interval; no duplicate orders.",
@@ -521,7 +521,7 @@
   },
   {
     "RuleID": "IL-B-Managed",
-    "Finding": "",
+    "Finding": "Interstitial Lung (ILA) - Known/Managed",
     "Severity": "Blue",
     "Condition": "Known ILD/ILA followed by pulmonology/ILD clinic with established imaging plan.",
     "Recommendation": "Continue ILD pathway and imaging cadence with pulmonology.",
@@ -529,7 +529,7 @@
   },
   {
     "RuleID": "LV-B-Managed",
-    "Finding": "",
+    "Finding": "Liver lesion - Known/Managed",
     "Severity": "Blue",
     "Condition": "Benign liver lesion (e.g., hemangioma/simple cyst) previously characterized and under surveillance if indicated.",
     "Recommendation": "Continue hepatology/GI plan; no new workup unless interval change.",
@@ -537,7 +537,7 @@
   },
   {
     "RuleID": "LR-B-Managed",
-    "Finding": "",
+    "Finding": "Lung-RADS (LDCT) - Program/Managed",
     "Severity": "Blue",
     "Condition": "Patient enrolled in lung cancer screening program with scheduled LDCT interval.",
     "Recommendation": "Continue screening program interval; coordinate with program as needed.",
@@ -545,7 +545,7 @@
   },
   {
     "RuleID": "LY-B-Managed",
-    "Finding": "",
+    "Finding": "Lymphadenopathy - Known/Managed",
     "Severity": "Blue",
     "Condition": "Nodes previously characterized/reactive or under oncology/ID/rheumatology follow-up.",
     "Recommendation": "Continue specialist/PCP plan; repeat workup only if clinical change.",
@@ -553,7 +553,7 @@
   },
   {
     "RuleID": "OV-B-Managed",
-    "Finding": "",
+    "Finding": "Ovarian Mass - Known/Managed",
     "Severity": "Blue",
     "Condition": "Adnexal finding under gynecology/gynecologic oncology pathway with imaging or surgery plan.",
     "Recommendation": "Continue Gyn/Gyn-Onc plan; follow scheduled imaging/procedures.",
@@ -561,7 +561,7 @@
   },
   {
     "RuleID": "PA-B-Managed",
-    "Finding": "",
+    "Finding": "Pancreatic cyst/mass - Known/Managed",
     "Severity": "Blue",
     "Condition": "Pancreatic cyst/IPMN under GI or surgical oncology surveillance (e.g., MRCP/EUS schedule).",
     "Recommendation": "Continue established surveillance interval and specialty follow-up.",
@@ -569,7 +569,7 @@
   },
   {
     "RuleID": "PR-B-Managed",
-    "Finding": "",
+    "Finding": "Prostate Finding - Known/Managed",
     "Severity": "Blue",
     "Condition": "Prostate finding under urology active surveillance/biopsy pathway.",
     "Recommendation": "Continue urology plan; no duplicative orders.",
@@ -577,7 +577,7 @@
   },
   {
     "RuleID": "RN-B-Managed",
-    "Finding": "",
+    "Finding": "Renal mass - Known/Managed",
     "Severity": "Blue",
     "Condition": "Renal lesion under urology management/surveillance or post-procedure follow-up.",
     "Recommendation": "Continue urology pathway and scheduled imaging.",
@@ -585,7 +585,7 @@
   },
   {
     "RuleID": "SP-B-Managed",
-    "Finding": "",
+    "Finding": "Splenic Lesion - Known/Managed",
     "Severity": "Blue",
     "Condition": "Benign splenic lesion documented as stable or under specialty/PCP follow-up.",
     "Recommendation": "Continue existing plan; no additional workup unless interval change.",
@@ -593,7 +593,7 @@
   },
   {
     "RuleID": "TH-B-Managed",
-    "Finding": "",
+    "Finding": "Thyroid nodule - Known/Managed",
     "Severity": "Blue",
     "Condition": "Thyroid nodule under endocrinology with TI-RADS/FNA pathway or surveillance cadence.",
     "Recommendation": "Continue endocrine plan and scheduled ultrasound/FNA as indicated.",
@@ -601,7 +601,7 @@
   },
   {
     "RuleID": "VF-B-Managed",
-    "Finding": "",
+    "Finding": "Vertebral Fracture - Known/Managed",
     "Severity": "Blue",
     "Condition": "Compression fracture/osteoporosis under endocrine/orthopedic management or osteoporosis clinic.",
     "Recommendation": "Continue specialist/PCP management (DEXA/therapy) per existing plan.",
