@@ -3,40 +3,48 @@
     "OrgName": "General Hospital",
     "AllowsFax": false,
     "FaxNumber": "555-123-4567",
-    "SpecialistsAvailable": [
-      "Cardiology (referral line 844-234-1234)",
-      "Pulmonology",
-      "Urology",
-      "Endocrinology",
-      "Gastroenterology",
-      "Oncology"
+    "Specialists": [
+      {
+        "name": "Cardiology",
+        "contact": "1-858-857-2555"
+      },
+      {
+        "name": "Urology",
+        "contact": "1-858-857-2559"
+      }
     ]
   },
   {
     "OrgName": "Community Clinic",
     "AllowsFax": false,
     "FaxNumber": "555-987-6543",
-    "SpecialistsAvailable": [
-      "Cardiology",
-      "Pulmonology"
+    "Specialists": [
+      {
+        "name": "Cardiology",
+        "contact": "1-256-584-8792"
+      },
+      {
+        "name": "Gastroenterology",
+        "contact": "1-256-584-8799"
+      }
     ]
   },
   {
     "OrgName": "",
     "AllowsFax": false,
     "FaxNumber": "",
-    "SpecialistsAvailable": []
+    "Specialists": []
   },
   {
     "OrgName": "",
     "AllowsFax": false,
     "FaxNumber": "",
-    "SpecialistsAvailable": []
+    "Specialists": []
   },
   {
     "OrgName": "",
     "AllowsFax": false,
     "FaxNumber": "",
-    "SpecialistsAvailable": []
+    "Specialists": []
   }
 ]
