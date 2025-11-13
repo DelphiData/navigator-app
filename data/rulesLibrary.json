@@ -606,5 +606,13 @@
     "Condition": "Compression fracture/osteoporosis under endocrine/orthopedic management or osteoporosis clinic.",
     "Recommendation": "Continue specialist/PCP management (DEXA/therapy) per existing plan.",
     "Logic": ""
+  },
+  {
+    "RuleID": "MT-P-01",
+    "Finding": "Likely metastatic lesion",
+    "Severity": "Purple",
+    "Condition": "Imaging features suspicious for metastatic disease in a patient with known malignancy or in the context of staging.",
+    "Recommendation": "Not an incidental pathway.\nContinue or escalate oncologic staging and management (e.g., MRI, PET/CT, biopsy) under oncology. No incidental-finder action needed.",
+    "Logic": ""
   }
 ]

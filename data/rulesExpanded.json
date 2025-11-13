@@ -1722,5 +1722,38 @@
       "clinic"
     ],
     "Logic": ""
+  },
+  {
+    "RuleID": "MT-P-01",
+    "Finding": "Likely metastatic lesion",
+    "Severity": "Purple",
+    "Condition": "Imaging features suspicious for metastatic disease in a patient with known malignancy or in the context of staging.",
+    "Recommendation": "Not an incidental pathway.\nContinue or escalate oncologic staging and management (e.g., MRI, PET/CT, biopsy) under oncology. No incidental-finder action needed.",
+    "organ": "general",
+    "aliases": [],
+    "negatives": [],
+    "specialty": "Primary Care",
+    "keywords": [
+      "likely",
+      "metastatic",
+      "lesion",
+      "imaging",
+      "features",
+      "suspicious",
+      "for",
+      "disease",
+      "in",
+      "a",
+      "patient",
+      "with",
+      "known",
+      "malignancy",
+      "or",
+      "the",
+      "context",
+      "of",
+      "staging"
+    ],
+    "Logic": ""
   }
 ]
