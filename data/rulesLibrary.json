@@ -614,5 +614,37 @@
     "Condition": "Imaging features suspicious for metastatic disease in a patient with known malignancy or in the context of staging.",
     "Recommendation": "Not an incidental pathway.\nContinue or escalate oncologic staging and management (e.g., MRI, PET/CT, biopsy) under oncology. No incidental-finder action needed.",
     "Logic": ""
+  },
+  {
+    "RuleID": "HR-G-01",
+    "Finding": "Hernia (all types)",
+    "Severity": "Green",
+    "Condition": "Small, uncomplicated hernia incidentally noted on imaging, including abdominal wall (umbilical/epigastric/ventral/incisional/parastomal), groin (inguinal/femoral/obturator), diaphragmatic/hiatal, or internal hernia. Fat-containing only or containing a short segment of non-dilated bowel, with no CT evidence of obstruction, incarceration, strangulation, volvulus, or ischemia; patient asymptomatic or minimally symptomatic per clinical information.",
+    "Recommendation": "Typically incidental. Inform PCP. No urgent surgical referral required. Consider elective general surgery (or foregut/thoracic surgery for hiatal/paraesophageal hernia) consultation if symptoms develop, the hernia enlarges, or the patient has high-risk occupation/activities.",
+    "Logic": "{\"name\":\"Managed hernia cue\",\"inputs\":[{\"id\":\"history\",\"type\":\"text\",\"label\":\"Known hernia or prior surgical consult/repair documented? (e.g., known ventral or inguinal hernia, bariatric surgery with internal hernia surveillance, planned hernia repair)\"}],\"evaluate\":[{\"when\":\"/(scheduled hernia repair|planned hernia surgery|known ventral hernia|known inguinal hernia|postoperative hernia repair|bariatric internal hernia surveillance)/i.test(history)\",\"useRuleId\":\"HR-B-Managed\",\"setSeverity\":\"Blue\",\"setRecommendation\":\"Known hernia already under surgical/foregut management; continue established plan unless new concerning symptoms.\",\"route\":{\"recipient\":\"Specialist\",\"specialist\":\"General surgery/foregut\",\"channel\":\"In-Basket\"}}]}"
+  },
+  {
+    "RuleID": "HR-A-01",
+    "Finding": "Hernia (all types)",
+    "Severity": "Amber",
+    "Condition": "Hernia (abdominal wall, groin, diaphragmatic/hiatal, internal, parastomal, or incisional) containing bowel or solid organ with higher-risk but non-emergent features: narrow neck, progressive or enlarging size, or associated symptoms (pain, pressure, intermittent obstructive symptoms), but without imaging evidence of strangulation or ischemia (no closed-loop configuration, no significant upstream obstruction, no reduced bowel wall enhancement, pneumatosis, or free intraperitoneal air). Includes paraesophageal hiatal hernia with mass effect but no volvulus, and postoperative/internal hernia with mesenteric swirling or sac-like clustered loops but no definitive closed-loop obstruction.",
+    "Recommendation": "Recommend non-urgent general surgery (or foregut/thoracic surgery for hiatal/paraesophageal hernia) consultation for evaluation and discussion of elective repair. Educate patient on signs of incarceration/obstruction and advise prompt ED evaluation if these occur.",
+    "Logic": "{\"name\":\"Managed hernia cue\",\"inputs\":[{\"id\":\"history\",\"type\":\"text\",\"label\":\"Known hernia or prior surgical consult/repair documented? (e.g., known ventral or inguinal hernia, bariatric surgery with internal hernia surveillance, planned hernia repair)\"}],\"evaluate\":[{\"when\":\"/(scheduled hernia repair|planned hernia surgery|known ventral hernia|known inguinal hernia|postoperative hernia repair|bariatric internal hernia surveillance)/i.test(history)\",\"useRuleId\":\"HR-B-Managed\",\"setSeverity\":\"Blue\",\"setRecommendation\":\"Known hernia already under surgical/foregut management; continue established plan unless new concerning symptoms.\",\"route\":{\"recipient\":\"Specialist\",\"specialist\":\"General surgery/foregut\",\"channel\":\"In-Basket\"}}]}"
+  },
+  {
+    "RuleID": "HR-R-01",
+    "Finding": "Hernia (all types)",
+    "Severity": "Red",
+    "Condition": "Any hernia (abdominal wall, groin, diaphragmatic/hiatal/paraesophageal, internal/postoperative, or traumatic) with CT evidence of incarceration, obstruction, or strangulation: non-reducible herniated contents by history; dilated upstream bowel with a transition at the hernia neck; closed-loop configuration; bowel wall thickening, mesenteric congestion, reduced or absent bowel wall enhancement, pneumatosis, portal venous gas, free intraperitoneal air, or perforation. Includes paraesophageal hernia with gastric volvulus, internal hernia after bariatric or other abdominal surgery with closed-loop obstruction or ischemia, or traumatic diaphragmatic hernia with compromised herniated viscera.",
+    "Recommendation": "Emergent condition. Recommend immediate surgical evaluation (emergency general surgery or foregut/thoracic surgery depending on location) and ED-level care for possible operative management.",
+    "Logic": "{\"name\":\"Managed hernia cue\",\"inputs\":[{\"id\":\"history\",\"type\":\"text\",\"label\":\"Known hernia or prior surgical consult/repair documented? (e.g., known ventral or inguinal hernia, bariatric surgery with internal hernia surveillance, planned hernia repair)\"}],\"evaluate\":[{\"when\":\"/(scheduled hernia repair|planned hernia surgery|known ventral hernia|known inguinal hernia|postoperative hernia repair|bariatric internal hernia surveillance)/i.test(history)\",\"useRuleId\":\"HR-B-Managed\",\"setSeverity\":\"Blue\",\"setRecommendation\":\"Known hernia already under surgical/foregut management; continue established plan unless new concerning symptoms.\",\"route\":{\"recipient\":\"Specialist\",\"specialist\":\"General surgery/foregut\",\"channel\":\"In-Basket\"}}]}"
+  },
+  {
+    "RuleID": "HR-B-Managed",
+    "Finding": "Hernia (all types)",
+    "Severity": "Blue",
+    "Condition": "Hernia of any type (abdominal wall, groin, diaphragmatic/hiatal, internal/postoperative, parastomal) already documented and under active surgical/foregut/thoracic or PCP management (e.g., elective repair scheduled, documented watchful-waiting plan, or post-repair surveillance) without new imaging signs of obstruction, strangulation, or perforation.",
+    "Recommendation": "Continue established surgical or PCP management plan (watchful waiting, scheduled elective repair, or post-repair surveillance). No additional navigator workup unless there is clinical or imaging change concerning for new incarceration or obstruction.",
+    "Logic": ""
   }
 ]
